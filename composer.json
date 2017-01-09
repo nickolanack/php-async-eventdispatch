@@ -1,0 +1,16 @@
+{
+    "name": "nickolanack/lib-async-eventdispatch",
+    "description": "An asyncrounous event dispatcher for php, emits events in background processes, and queues future events.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nick Blackwell",
+            "email": "nickblackwell82@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": { "asyncevent\\": "src/" }
+    }
+}
