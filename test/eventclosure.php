@@ -29,7 +29,7 @@ $listener=new asyncevent\ExternalListeners(function($event)use(&$dispatcher){
 	function($listener, $event, $eventArgs){
 		$listener($event, $eventArgs);
 	}
-):
+);
 
 
 $dispatcher=new asyncevent\EventDispatcher(
