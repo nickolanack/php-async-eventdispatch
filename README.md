@@ -1,4 +1,7 @@
-# README #
+# php-async-eventdispatch #
+
+I want my web apps to be really fast, and not have the overhead of system events. 
+
 Usage
 ```php
 
