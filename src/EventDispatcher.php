@@ -186,7 +186,7 @@ class EventDispatcher
 				pcntl_waitpid($child);
 
 			}
-			$this->_log('Fork parent finished: '.getmypid());
+			$this->_log('Fork parent finished: '.getmypid().' -> '.json_encode($children));
 		}
 
 	}
