@@ -26,32 +26,34 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 
 if($dispatcher->shouldHandleEvent()){
 
-	$handler=new asyncevent\EventHandler(array(
-		'setEnvironment' => function($env){
-		
-			// these are the variables you passed to the emitter, they came back from the command line
-			$system->setSession($env['session']);
-			$system->setUserFromAccessToken($env['access_token'])
-			
-		},
-		'getEventListeners'=>function($event)use(&$dispatcher){
-		
-			// resolve event listeners. 
-			// whatever you return here will just become available to you 
-			// in 'handleEvent' below, so it could be objects or strings, ids...
-			return array(
-				instantiateSomeClass(...)
-			);
+	$handler=;
 
-		},
-		'handleEvent'=>function($listener, $event, $eventArgs){
+	$dispatcher->handleEvent(
+		array(
+			'setEnvironment' => function($env){
 			
-			$listener->someEventMethod($event, $eventArgs);
+				// these are the variables you passed to the emitter, they came back from the command line
+				$system->setSession($env['session']);
+				$system->setUserFromAccessToken($env['access_token'])
+				
+			},
+			'getEventListeners'=>function($event)use(&$dispatcher){
 			
-		}
-	));
+				// resolve event listeners. 
+				// whatever you return here will just become available to you 
+				// in 'handleEvent' below, so it could be objects or strings, ids...
+				return array(
+					instantiateSomeClass(...)
+				);
 
-	$dispatcher->handleEvent($handler);
+			},
+			'handleEvent'=>function($listener, $event, $eventArgs){
+				
+				$listener->someEventMethod($event, $eventArgs);
+				
+			}
+		)
+	);
 	return;
 }
 

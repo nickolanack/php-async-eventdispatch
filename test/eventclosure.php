@@ -29,44 +29,46 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 if($dispatcher->shouldHandleEvent()){
 
 	echo getmypid().' Should Handle'."\n";
-	$dispatcher->handleEvent(new asyncevent\EventHandler(array(
-	'setEnvironment' => function($env){
-		//This will be called each time a new process is created 
-		//$env is an array of key value pairs passed to thhe
-		echo 'Set Env '.json_encode($env)."\n";
+	$dispatcher->handleEvent(
+		array(
+			'setEnvironment' => function($env){
+				//This will be called each time a new process is created 
+				//$env is an array of key value pairs passed to thhe
+				echo 'Set Env '.json_encode($env)."\n";
 
-	},
-	'getEventListeners'=>function($event)use(&$dispatcher){
-
-		return array(
-			function($event, $eventArgs)use(&$dispatcher){
-
-				sleep(2);
-
-				echo getmypid().' Event listener 1 (callback function) for event (and emits recursively): '.$event.' '.json_encode($eventArgs)."\n";
-				if($event=='testEvent'){
-					echo getmypid().' Emit recursive testEvent at depth: '.$dispatcher->getDepth()."\n";
-					$dispatcher->emit('testEvent', array(
-						'hello'=>'world', 
-					));
-				}
-				
 			},
-			function($event, $eventArgs)use(&$dispatcher){
+			'getEventListeners'=>function($event)use(&$dispatcher){
 
-				sleep(2);
+				return array(
+					function($event, $eventArgs)use(&$dispatcher){
 
-				echo getmypid().' Event listener 2 (callback function)'."\n";
-				
+						sleep(2);
+
+						echo getmypid().' Event listener 1 (callback function) for event (and emits recursively): '.$event.' '.json_encode($eventArgs)."\n";
+						if($event=='testEvent'){
+							echo getmypid().' Emit recursive testEvent at depth: '.$dispatcher->getDepth()."\n";
+							$dispatcher->emit('testEvent', array(
+								'hello'=>'world', 
+							));
+						}
+						
+					},
+					function($event, $eventArgs)use(&$dispatcher){
+
+						sleep(2);
+
+						echo getmypid().' Event listener 2 (callback function)'."\n";
+						
+					}
+					//, ... more event listeners for this event.
+				);
+
+			},
+			'handleEvent'=>function($listener, $event, $eventArgs){
+				$listener($event, $eventArgs);
 			}
-			//, ... more event listeners for this event.
-		);
-
-	},
-	'handleEvent'=>function($listener, $event, $eventArgs){
-		$listener($event, $eventArgs);
-	}
-)));
+		)
+	);
 	return; 
 }
 
