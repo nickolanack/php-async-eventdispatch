@@ -11,7 +11,7 @@ Usage - Boilerplate
 
 require __DIR__.'/vendor/autoload.php';
 
-$emitter=new asyncevent\ShellEventEmitter(array(
+$dispatcher=new asyncevent\AsyncEventDispatcher(array(
 	'command'=>'php '.__FILE__, 
 	'getEnvironment'=>function(){
 		//get some environment variables to pass to shell_exec on cli
@@ -22,16 +22,11 @@ $emitter=new asyncevent\ShellEventEmitter(array(
 			//things like domain name, ip address, web browser might be useful
 		);
 	}
-	
-));
-
-$dispatcher=new asyncevent\EventDispatcher(array(
-	'eventEmitter'=>$emitter
 ));
 
 if($dispatcher->shouldHandleEvent()){
 
-	$handler=new asyncevent\ClosureHandler(array(
+	$handler=new asyncevent\EventHandler(array(
 		'setEnvironment' => function($env){
 		
 			// these are the variables you passed to the emitter, they came back from the command line

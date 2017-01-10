@@ -5,16 +5,7 @@ require dirname(__DIR__).'/vendor/autoload.php';
 
 
 
-/**
- * Initialize an emitter. an emitter is responsible for firing events, in this case calling 
- * shell_exec, on this file (__FILE__) with event arguments (detected below)
- *
- * The environment variables try to simulate http environment variables but this is actually going to execute on cli
- */
-
-
-
-$emitter=new asyncevent\ShellEventEmitter(array(
+$dispatcher=new asyncevent\AsyncEventDispatcher(array(
 	'command'=>'php '.__FILE__, 
 	'getEnvironment'=>function(){
 		//get environment variables for passing to shell_exec on cli
@@ -24,17 +15,21 @@ $emitter=new asyncevent\ShellEventEmitter(array(
 			'scriptpath'=>basename(__FILE__),
 			'ip'=>'0.0.0.0'
 		);
+	},
+	'log'=>function($message)use(&$dispatcher){
+		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
 	}
-	
 ));
 
-/**
- * Initialize a handler. A handler is responsible applying environment variable, resolving event listener objects, 
- * and for calling event handler methods on event listener objects. ClosureHandler allows simple user defined 
+
+
+/*
+ * 
  */
+if($dispatcher->shouldHandleEvent()){
 
-
-$handler=new asyncevent\ClosureHandler(array(
+	echo getmypid().' Should Handle'."\n";
+	$dispatcher->handleEvent(new asyncevent\EventHandler(array(
 	'setEnvironment' => function($env){
 		//This will be called each time a new process is created 
 		//$env is an array of key value pairs passed to thhe
@@ -71,26 +66,7 @@ $handler=new asyncevent\ClosureHandler(array(
 	'handleEvent'=>function($listener, $event, $eventArgs){
 		$listener($event, $eventArgs);
 	}
-));
-
-
-$dispatcher=new asyncevent\EventDispatcher(array(
-	'eventEmitter'=>$emitter, 
-	'eventHandler'=>$handler,
-	'log'=>function($message)use(&$dispatcher){
-		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
-	}
-));
-
-
-
-/*
- * 
- */
-if($dispatcher->shouldHandleEvent()){
-
-	echo getmypid().' Should Handle'."\n";
-	$dispatcher->handleEvent();
+)));
 	return; 
 }
 

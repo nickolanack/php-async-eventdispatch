@@ -15,6 +15,7 @@ class EventDispatcher
 		}
 
 		if(!key_exists('eventEmitter', $config)){
+
 			throw new \Exception('ClosureHandler requires eventEmitter parameter');
 		}
 
