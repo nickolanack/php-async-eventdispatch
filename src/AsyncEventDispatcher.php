@@ -13,9 +13,9 @@ class AsyncEventDispatcher extends EventDispatcher
 	public function handleEvent($config){
 
 		if($config instanceof Handler){
-			self::parent($config);
+			parent::handleEvent($config);
 		}else{
-			self::parent(new EventHandler($config));
+			parent::handleEvent(new EventHandler($config));
 		}
 	}
 }
