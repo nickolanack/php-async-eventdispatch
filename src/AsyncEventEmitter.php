@@ -99,10 +99,6 @@ class AsyncEventEmitter implements EventEmitter
 
 	}
 
-	public function setShellCommandFn($fn){
-		$this->shellCmdFn=$fn;
-	}
-
 	public function fireEvent($event, $eventArgs){
 
 		
@@ -115,6 +111,12 @@ class AsyncEventEmitter implements EventEmitter
 		//echo $error?'FAILED':'SUCCESS';
 
 	}
+
+	
+	public function getShellEventCommand($event, $eventArgs){
+		return $this->_cmd().$this->_args($event, $eventArgs);
+	}
+
 	protected function _cmd(){
 		return $this->cmd;
 	}
