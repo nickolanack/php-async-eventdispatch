@@ -53,9 +53,9 @@ class EventDispatcher
 
 	}
 	public function emitSync($event, $eventArgs){
-
+		$this->_log('Begin emitting syncrounously: '.$event.'('.json_encode($eventArgs).')');
 		$this->emitter->fireEventSync($event, $eventArgs);
-
+		$this->_log('Done emitting: '.$event);
 	}
 
 	public function scheduleEvent($event, $eventArgs, $secondsFromNow){

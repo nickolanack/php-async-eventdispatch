@@ -102,13 +102,19 @@ class AsyncEventEmitter implements EventEmitter
 	public function fireEvent($event, $eventArgs){
 
 		
-		//$bg='';
+
 		$bg=' &';
 		$cmd=$this->_cmd().$this->_args($event, $eventArgs).$this->_out().$bg;
-
-		//echo ($cmd)."\n";
 		system($cmd, $error);
-		//echo $error?'FAILED':'SUCCESS';
+
+
+	}
+
+	public function fireEventSync($event, $data){
+
+		$cmd=$this->_cmd().$this->_args($event, $eventArgs).$this->_out();
+		system($cmd, $error);
+
 
 	}
 
