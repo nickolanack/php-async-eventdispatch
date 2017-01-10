@@ -1,6 +1,5 @@
 <?php
 
-echo getmypid().' Event Runner Test'."\n";
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
@@ -96,6 +95,7 @@ if($dispatcher->shouldHandleEvent()){
 }
 
 
+echo getmypid().' Event Runner Test'."\n";
 echo getmypid().' Emit testEvent'."\n";
 $dispatcher->emit('testEvent', array(
 	'hello'=>'world',

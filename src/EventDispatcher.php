@@ -145,6 +145,8 @@ class EventDispatcher
 
 	protected function _handleEvent($listeners, $event, $eventArgs){
 
+		$i=1;
+		$children=array();
 		foreach($listeners as $listener){
 
 
@@ -158,24 +160,33 @@ class EventDispatcher
 			    $this->_executeHandler($listener, $event, $eventArgs);
 
 			} else if ($pid) {
-			     $this->_log('Forked parent:'.$pid);
+				$children[]=$pid;
+			     $this->_log('Forked parent->'.$pid);
 			     
-			     //this causes the initial parent process that is responding to the event, 
-			     //to 
-			     pcntl_wait($status); 
+			    
 
 
-			     $this->_log('Fork parent finished:'.$pid);
+			    
 			} else {
-				$this->_log('Forked child:'.$pid);
+				$this->_log('Child: #'.$i;
 			    $this->_executeHandler($listener, $event, $eventArgs);
-			    $this->_log('Forked child finished :'.$pid);
+			    $this->_log('Child #'.$i.' finished');
 
 			    //need to return here or the child will also fork and execute on the next loop
 			    return;
 
 			}
 
+			$i++;
+
+		}
+		if(!empty($children){
+			foreach($children as $child){
+				//only the parent should get here becuase $children would be empty otherwise
+				pcntl_waitpid($child);
+
+			}
+			$this->_log('Fork parent finished: '.getmypid());
 		}
 
 	}
