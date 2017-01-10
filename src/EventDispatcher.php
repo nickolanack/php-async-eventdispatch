@@ -168,7 +168,7 @@ class EventDispatcher
 
 			    
 			} else {
-				$this->_log('Child: #'.$i;
+				$this->_log('Child: #'.$i);
 			    $this->_executeHandler($listener, $event, $eventArgs);
 			    $this->_log('Child #'.$i.' finished');
 
