@@ -39,6 +39,7 @@ $handler=new asyncevent\ClosureHandler(array(
 	'setEnvironment' => function($env){
 		//This will be called each time a new process is created 
 		//$env is an array of key value pairs passed to thhe
+		echo 'Set Env '.json_encode($env)."\n";
 
 	},
 	'getEventListeners'=>function($event)use(&$dispatcher){
@@ -47,21 +48,13 @@ $handler=new asyncevent\ClosureHandler(array(
 			function($event, $eventArgs)use(&$dispatcher){
 				echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
 				if($event=='testEvent'){
-					echo getmypid().' Emit testEvent'."\n";
-					$dispatcher->emit('testEvent', array(
-						'hello'=>'world', 
-					));
-				}
-			},
-			function($event, $eventArgs)use(&$dispatcher){
-				echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
-				if($event=='testEvent'){
-					echo getmypid().' Emit testEvent'."\n";
+					echo getmypid().' Emit recursive testEvent at depth: '.$dispatcher->getDepth()."\n";
 					$dispatcher->emit('testEvent', array(
 						'hello'=>'world', 
 					));
 				}
 			}
+			//, ... more event listeners for this event.
 		);
 
 	},
@@ -73,7 +66,10 @@ $handler=new asyncevent\ClosureHandler(array(
 
 $dispatcher=new asyncevent\EventDispatcher(array(
 	'eventEmitter'=>$emitter, 
-	'eventHandler'=>$handler
+	'eventHandler'=>$handler,
+	'log'=>function($message){
+		file_put_contents(__DIR__.'/.closure.log', getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
+	}
 ));
 
 
@@ -85,9 +81,12 @@ if($dispatcher->shouldHandleEvent()){
 
 	echo getmypid().' Should Handle'."\n";
 	$dispatcher->handleEvent();
-}else{
-	echo getmypid().' Emit testEvent'."\n";
-	$dispatcher->emit('testEvent', array(
-		'hello'=>'world',
-	));
+	return; 
 }
+
+
+echo getmypid().' Emit testEvent'."\n";
+$dispatcher->emit('testEvent', array(
+	'hello'=>'world',
+));
+

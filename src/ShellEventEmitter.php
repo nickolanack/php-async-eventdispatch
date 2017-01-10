@@ -149,9 +149,6 @@ class ShellEventEmitter implements EventEmitter
 
 	}
 
-	public function fireEventSync($event, $data){
-
-	}
 
 	public function hasEvent(){
 
@@ -168,6 +165,11 @@ class ShellEventEmitter implements EventEmitter
 	public function getTrace(){
 
 		return $this->trace;
+
+	}
+	public function getDepth(){
+
+		return $this->depth;
 
 	}
 

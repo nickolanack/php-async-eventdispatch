@@ -34,11 +34,16 @@ class ClosureHandler extends Handler
 
 	}
 	public function setEnvironmentVariables($env){
+		
 		$environment=$this->environment;
 		if($environment){
+			echo 'Apply environment variables from cli: '.json_encode($env)."\n";
 			$environment($env);
+		}else{
+			echo 'Implementor did not apply environment variables from cli: '.json_encode($env)."\n";
 		}
 	}
+		
 	
 
 	public function getEventListeners($event){
@@ -52,7 +57,7 @@ class ClosureHandler extends Handler
 	}
 
 
-	protected function handle($listener, $event, $eventArgs){
+	public function handleEvent($listener, $event, $eventArgs){
 		$handler=$this->handler;
 		$handler($listener, $event, $eventArgs);
 	}
