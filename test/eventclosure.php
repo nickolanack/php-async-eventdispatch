@@ -46,13 +46,18 @@ $handler=new asyncevent\ClosureHandler(array(
 
 		return array(
 			function($event, $eventArgs)use(&$dispatcher){
-				echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
+				echo getmypid().' Event listener 1 (callback function) for event (and emits recursively): '.$event.' '.json_encode($eventArgs)."\n";
 				if($event=='testEvent'){
 					echo getmypid().' Emit recursive testEvent at depth: '.$dispatcher->getDepth()."\n";
 					$dispatcher->emit('testEvent', array(
 						'hello'=>'world', 
 					));
 				}
+				sleep(2);
+			},
+			function($event, $eventArgs)use(&$dispatcher){
+				echo getmypid().' Event listener 2 (callback function)'."\n";
+				sleep(2);
 			}
 			//, ... more event listeners for this event.
 		);

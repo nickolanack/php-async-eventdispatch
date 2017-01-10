@@ -158,12 +158,18 @@ class EventDispatcher
 			    $this->_executeHandler($listener, $event, $eventArgs);
 
 			} else if ($pid) {
-			     $this->_log('Forked');
-			     pcntl_wait($status); //Protect against Zombie children
-			     $this->_log('Fork parent finished');
-			} else {
-			    $this->_executeHandler($listener, $event, $eventArgs);
+			     $this->_log('Forked parent:'.$pid);
+			     
+			     //this causes the initial parent process that is responding to the event, 
+			     //to 
+			     pcntl_wait($status); 
 
+
+			     $this->_log('Fork parent finished:'.$pid);
+			} else {
+				$this->_log('Forked child:'.$pid);
+			    $this->_executeHandler($listener, $event, $eventArgs);
+			    $this->_log('Forked child finished :'.$pid);
 			}
 
 		}
