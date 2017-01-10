@@ -168,12 +168,13 @@ class EventDispatcher
 
 			    
 			} else {
+
 				$this->_log('Child: #'.$i);
 			    $this->_executeHandler($listener, $event, $eventArgs);
 			    $this->_log('Child #'.$i.' finished');
 
 			    //need to return here or the child will also fork and execute on the next loop
-			    return;
+			    exit(0);
 
 			}
 
@@ -181,10 +182,11 @@ class EventDispatcher
 
 		}
 		if(!empty($children)){
-			foreach($children as $child){
+			foreach($children as $index=>$child){
 				//only the parent should get here becuase $children would be empty otherwise
+				$this->_log('Wait for child #'.($index+1));
 				pcntl_waitpid($child);
-
+				$this->_log('Signaled exit from #'.($index+1));
 			}
 			$this->_log('Fork parent finished: '.getmypid().' -> '.json_encode($children));
 		}
