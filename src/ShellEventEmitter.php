@@ -112,7 +112,7 @@ class ShellEventEmitter implements EventEmitter
 
 		echo ($cmd)."\n";
 		system($cmd, $error);
-		echo $success?'success':'failed';
+		echo $error?'FAILED':'SUCCESS';
 
 	}
 	protected function _cmd(){
