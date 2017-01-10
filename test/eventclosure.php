@@ -6,36 +6,65 @@ require dirname(__DIR__).'/vendor/autoload.php';
 
 
 
-$emitter=new asyncevent\ShellEventEmitter(
-	'php '.__FILE__, 
-	function(){
+/**
+ * Initialize an emitter. an emitter is responsible for firing events, in this case calling 
+ * shell_exec, on this file (__FILE__) with event arguments (detected below)
+ *
+ * The environment variables try to simulate http environment variables but this is actually going to execute on cli
+ */
+
+
+
+$emitter=new asyncevent\ShellEventEmitter(array(
+	'command'=>'php '.__FILE__, 
+	'getEnvironment'=>function(){
+		//get environment variables for passing to shell_exec on cli
+		echo getmypid().' Pass environment variables'."\n";
 		return array(
+			'session'=>'testsession',
 			'domain'=>'www.example.com',
-			'scriptpath'=>'index.php',
-			'ip' => '0.0.0.0'
+			'scriptpath'=>basename(__FILE__),
+			'ip'=>'0.0.0.0'
 		);
 	}
-);
+	
+));
 
-$listener=new asyncevent\ExternalListeners(function($event)use(&$dispatcher){
+/**
+ * Initialize a handler. A handler is responsible applying environment variable, resolving event listener objects, 
+ * and for calling event handler methods on event listener objects. ClosureHandler allows simple user defined 
+ */
+
+
+$handler=new asyncevent\ClosureHandler(array(
+	'setEnvironment' => function($env){
+		//apply environment variables recieved from cli
+		echo getmypid().' Apply environment variables'."\n";
+
+	},
+	'getEventListeners'=>function($event)use(&$dispatcher){
 
 		return array(function($event, $eventArgs)use(&$dispatcher){
-			echo getmypid().' I am an event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
+			echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
 			if($event=='testEvent'){
-				$dispatcher->emit('test2Event', array('hello'=>'world'));
+				echo getmypid().' Emit testEvent'."\n";
+				$dispatcher->emit('testEvent', array(
+					'hello'=>'world', 
+				));
 			}
 		});
+
 	},
-	function($listener, $event, $eventArgs){
+	'handleEvent'=>function($listener, $event, $eventArgs){
 		$listener($event, $eventArgs);
 	}
-):
+));
 
 
-$dispatcher=new asyncevent\EventDispatcher(
-	$emitter, 
-	$listener
-);
+$dispatcher=new asyncevent\EventDispatcher(array(
+	'eventEmitter'=>$emitter, 
+	'eventHandler'=>$handler
+));
 
 
 
@@ -48,5 +77,7 @@ if($dispatcher->shouldHandleEvent()){
 	$dispatcher->handleEvent();
 }else{
 	echo getmypid().' Emit testEvent'."\n";
-	$dispatcher->emit('testEvent', array('hello'=>'world'));
+	$dispatcher->emit('testEvent', array(
+		'hello'=>'world',
+	));
 }

@@ -1,10 +1,11 @@
 <?php
 namespace asyncevent;
-abstract class Listeners{
+abstract class Handler{
 
 	abstract public function getEventListeners($event);
 	abstract public function addEventListener($object, $event);
-
+	abstract public function setEnvironmentVariables($env);
+	
 	abstract protected function handle($listener, $object, $event);
 
 	public function handleEvent($event, $eventArgs){

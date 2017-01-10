@@ -5,12 +5,30 @@ class EventDispatcher
 {
 	
 	protected $emitter;
-	protected $listeners;
+	protected $handler;
 
-	public function __construct(EventEmitter $emitter, Listeners $listeners){
+	public function __construct($config){
 
-		$this->emitter=$emitter;
-		$this->listeners=$listeners;
+		if(is_object($config)){
+			$config=get_object_vars($config);
+		}
+
+		if(!key_exists('eventEmitter', $config)){
+			throw new \Exception('ClosureHandler requires eventEmitter parameter');
+		}
+
+		$this->emitter=$config['eventEmitter'];
+		if(!($this->emitter instanceof EventEmitter)){
+			throw new \Exception('ClosureHandler expects eventEmitter to implement EventEmitter');
+		}
+
+		if(key_exists('eventHandler', $config)){
+			$this->handler=$config['eventHandler'];
+			if(!($this->handler instanceof Handler)){
+				throw new \Exception('ClosureHandler expects eventHandler to implement Handler');
+			}
+		}
+		
 
 	}
 
@@ -33,12 +51,22 @@ class EventDispatcher
 	}
 
 	public function shouldHandleEvent(){
+
+
 		return $this->emitter->hasEvent();
 	}
 
-	public function handleEvent(){
+	public function handleEvent(Handler $handler=null){
 
-		$this->listeners->handleEvent($this->emitter->getEvent(), $this->emitter->getEventArgs());
+		if($handler){
+			$this->handler=$handler;
+		}
+
+		if(!$this->handler){
+			throw new \Exception('EventDispatcher Requires a Handler object');
+		}
+		$this->handler->setEnvironmentVariables($this->emitter->getEnvironmentVariables());
+		$this->handler->handleEvent($this->emitter->getEvent(), $this->emitter->getEventArgs());
 
 			
 	}  

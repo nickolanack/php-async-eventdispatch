@@ -10,6 +10,13 @@ interface EventEmitter
 
 	public function hasEvent();
 	public function getEvent();
+
 	public function getEventArgs();
+
+	/**
+	 * returns an array of key=>value pairs passed to process
+	 * @return [type] [description]
+	 */
+	public function getEnvironmentVariables();
 
 }
