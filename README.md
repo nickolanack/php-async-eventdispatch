@@ -1,6 +1,10 @@
 # php-async-eventdispatch #
 
-I want my web apps to be really fast, and not have the overhead of system events, but unfortunately I can't fork processes under apache, so this implementation, executes using shell_exec/system to start a new process (environment variables are passed to process) and listener methods are executed in the new process (fork is used in the new process which should become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait
+I want my web apps to be really fast, and not have the overhead of system events, but unfortunately I can't fork processes under apache.
+
+This implementation, handles events in a new process by using shell_exec/system commands (environment variables are passed to process from cli). All listener methods are executed in the new process and can emit thier own events (up to max recursive depth) and othewise take as long as they need.  
+
+pcntl_fork is used/attempted in the handler process (which should have become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait
 
 Usage
 ```php
