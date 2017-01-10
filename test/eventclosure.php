@@ -77,8 +77,8 @@ $handler=new asyncevent\ClosureHandler(array(
 $dispatcher=new asyncevent\EventDispatcher(array(
 	'eventEmitter'=>$emitter, 
 	'eventHandler'=>$handler,
-	'log'=>function($message){
-		file_put_contents(__DIR__.'/.closure.log', getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
+	'log'=>function($message)use(&$dispatcher){
+		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
 	}
 ));
 
