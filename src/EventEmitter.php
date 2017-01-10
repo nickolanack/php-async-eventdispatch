@@ -10,6 +10,7 @@ interface EventEmitter
 
 	public function hasEvent();
 	public function getEvent();
+	public function getTrace();
 
 	public function getEventArgs();
 

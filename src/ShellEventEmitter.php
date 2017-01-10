@@ -165,6 +165,12 @@ class ShellEventEmitter implements EventEmitter
 
 	}
 
+	public function getTrace(){
+
+		return $this->trace;
+
+	}
+
 	public function getEventArgs(){
 
 		return $this->eventArgs;
