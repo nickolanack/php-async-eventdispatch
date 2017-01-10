@@ -6,7 +6,7 @@ class AsyncEventDispatcher extends EventDispatcher
 
 	public function __construct($config){
 
-		parent::__construct(array_merge($config, array('emitter'=>new AsyncEventEmitter($config));
+		parent::__construct(array_merge($config, array('emitter'=>new AsyncEventEmitter($config))));
 
 	}
 
