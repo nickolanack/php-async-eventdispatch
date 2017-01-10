@@ -180,7 +180,7 @@ class EventDispatcher
 			$i++;
 
 		}
-		if(!empty($children){
+		if(!empty($children)){
 			foreach($children as $child){
 				//only the parent should get here becuase $children would be empty otherwise
 				pcntl_waitpid($child);
