@@ -110,9 +110,9 @@ class ShellEventEmitter implements EventEmitter
 		$bg=' &';
 		$cmd=$this->_cmd().$this->_args($event, $eventArgs).$this->_out().$bg;
 
-		echo ($cmd)."\n";
+		//echo ($cmd)."\n";
 		system($cmd, $error);
-		echo $error?'FAILED':'SUCCESS';
+		//echo $error?'FAILED':'SUCCESS';
 
 	}
 	protected function _cmd(){

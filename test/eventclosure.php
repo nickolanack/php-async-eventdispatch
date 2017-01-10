@@ -19,7 +19,6 @@ $emitter=new asyncevent\ShellEventEmitter(array(
 	'command'=>'php '.__FILE__, 
 	'getEnvironment'=>function(){
 		//get environment variables for passing to shell_exec on cli
-		echo getmypid().' Pass environment variables'."\n";
 		return array(
 			'session'=>'testsession',
 			'domain'=>'www.example.com',
@@ -38,8 +37,8 @@ $emitter=new asyncevent\ShellEventEmitter(array(
 
 $handler=new asyncevent\ClosureHandler(array(
 	'setEnvironment' => function($env){
-		//apply environment variables recieved from cli
-		echo getmypid().' Apply environment variables'."\n";
+		//This will be called each time a new process is created 
+		//$env is an array of key value pairs passed to thhe
 
 	},
 	'getEventListeners'=>function($event)use(&$dispatcher){
