@@ -170,6 +170,10 @@ class EventDispatcher
 				$this->_log('Forked child:'.$pid);
 			    $this->_executeHandler($listener, $event, $eventArgs);
 			    $this->_log('Forked child finished :'.$pid);
+
+			    //need to return here or the child will also fork and execute on the next loop
+			    return;
+
 			}
 
 		}
