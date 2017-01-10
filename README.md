@@ -26,7 +26,6 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 
 if($dispatcher->shouldHandleEvent()){
 
-	$handler=;
 
 	$dispatcher->handleEvent(
 		array(
