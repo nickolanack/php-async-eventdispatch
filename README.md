@@ -53,8 +53,10 @@ if($dispatcher->shouldHandleEvent()){
 			}
 		)
 	);
-	return;
+	return; //this process should be finished after executing events.
 }
 
+
+// render web app, and use $dispatcher->emit($event, $eventArgs);
 
 ```
