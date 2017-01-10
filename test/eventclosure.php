@@ -17,7 +17,7 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 		);
 	},
 	'log'=>function($message)use(&$dispatcher){
-		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
+		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()*4).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
 	}
 ));
 
