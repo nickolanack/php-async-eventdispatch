@@ -44,15 +44,26 @@ $handler=new asyncevent\ClosureHandler(array(
 	},
 	'getEventListeners'=>function($event)use(&$dispatcher){
 
-		return array(function($event, $eventArgs)use(&$dispatcher){
-			echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
-			if($event=='testEvent'){
-				echo getmypid().' Emit testEvent'."\n";
-				$dispatcher->emit('testEvent', array(
-					'hello'=>'world', 
-				));
+		return array(
+			function($event, $eventArgs)use(&$dispatcher){
+				echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
+				if($event=='testEvent'){
+					echo getmypid().' Emit testEvent'."\n";
+					$dispatcher->emit('testEvent', array(
+						'hello'=>'world', 
+					));
+				}
+			},
+			function($event, $eventArgs)use(&$dispatcher){
+				echo getmypid().' Event listener (callback function) for event: '.$event.' '.json_encode($eventArgs)."\n";
+				if($event=='testEvent'){
+					echo getmypid().' Emit testEvent'."\n";
+					$dispatcher->emit('testEvent', array(
+						'hello'=>'world', 
+					));
+				}
 			}
-		});
+		);
 
 	},
 	'handleEvent'=>function($listener, $event, $eventArgs){

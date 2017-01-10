@@ -69,7 +69,7 @@ class ShellEventEmitter implements EventEmitter
 				}
 				if (key_exists('depth', $args)) {
 					$this->depth = (int) $args['depth'];
-					if($this->depth>=15){
+					if($this->depth>=6){
 						throw new Exception('Async EventEmitter reached nested event limit: '.$this->depth);
 					}
 				}
