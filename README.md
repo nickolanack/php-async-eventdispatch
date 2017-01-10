@@ -6,7 +6,7 @@ This implementation, handles events in a new process by using shell_exec/system 
 
 pcntl_fork is used/attempted in the handler process (which should have become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait
 
-Usage
+Usage - Boilerplate
 ```php
 
 require __DIR__.'/vendor/autoload.php';
