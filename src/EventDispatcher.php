@@ -158,7 +158,7 @@ class EventDispatcher
 
 
 			$pid=-1;
-			if($this->fork&&function_exists('pcntl_fork')){
+			if($this->canFork&&function_exists('pcntl_fork')){
 				$pid = pcntl_fork();
 			}
 			
