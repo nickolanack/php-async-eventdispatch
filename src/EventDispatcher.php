@@ -54,17 +54,45 @@ class EventDispatcher
 	public function emit($event, $eventArgs){
 
 		$this->_log('Begin emitting: '.$event.'('.json_encode($eventArgs).')');
+		ob_start();
+
 		$this->emitter->fireEvent($event, $eventArgs);
+
+		$content=trim(ob_get_contents());
+		if(!empty($content)){
+			$this->_log($content);
+		}
+		ob_end_clean();
 		$this->_log('Done emitting: '.$event);
 
 	}
 	public function emitSync($event, $eventArgs){
 		$this->_log('Begin emitting syncrounously: '.$event.'('.json_encode($eventArgs).')');
+		ob_start();
+		
 		$this->emitter->fireEventSync($event, $eventArgs);
+
+		$content=trim(ob_get_contents());
+		if(!empty($content)){
+			$this->_log($content);
+		}
+		ob_end_clean();
 		$this->_log('Done emitting: '.$event);
 	}
 
-	public function scheduleEvent($event, $eventArgs, $secondsFromNow){
+	public function schedule($event, $eventArgs, $secondsFromNow){
+		
+		$this->_log('Begin scheduling: '.$event.'('.json_encode($eventArgs).')');
+		ob_start();
+		
+		$this->emitter->scheduleEvent($event, $eventArgs, $secondsFromNow);
+
+		$content=trim(ob_get_contents());
+		if(!empty($content)){
+			$this->_log($content);
+		}
+		ob_end_clean();
+		$this->_log('Done emitting: '.$event);
 
 	}
 

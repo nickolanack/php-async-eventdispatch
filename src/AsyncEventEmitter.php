@@ -104,20 +104,53 @@ class AsyncEventEmitter implements EventEmitter
 		
 
 		$bg=' &';
-		$cmd=$this->_cmd().$this->_args($event, $eventArgs).$this->_out().$bg;
+		$cmd=$this->getShellEventCommand($event, $eventArgs).$this->_out().$bg;
 		system($cmd, $error);
 
 
 	}
 
-	public function fireEventSync($event, $data){
+	public function fireEventSync($event, $eventArgs){
 
-		$cmd=$this->_cmd().$this->_args($event, $eventArgs).$this->_out();
+		$cmd=$this->getShellEventCommand($event, $eventArgs).$this->_out();
 		system($cmd, $error);
 
 
 	}
 
+
+	public function scheduleEvent($event, $eventArgs, $secondsFromNow){
+
+		$now=time();
+		$time=$now+$secondsFromNow;
+
+		while(file_exists($file=$this->getScheduleFile($token=$this->getScheduleToken()))){}
+
+
+		file_put_contents($file, 
+			json_encode(array(
+				'schedule'=>array(
+					'dispatched'=>$now,
+					'time'=>$time,
+					'token'=>$token
+				),
+
+				'cmd'=>$this->getShellEventCommand($event, $eventArgs).$this->_out().' &'
+
+			), JSON_PRETTY_PRINT));
+
+
+		system($keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($file).$this->_out().' &');
+		
+		
+
+	}
+	protected function getScheduleToken(){
+		return 'schedule'.substr(md5(time().rand(1000, 9999)), 0, 10);
+	}
+	protected function getScheduleFile($token){
+		return __DIR__.'/.'.$this->getScheduleToken().'.json';
+	}
 	
 	public function getShellEventCommand($event, $eventArgs){
 		return $this->_cmd().$this->_args($event, $eventArgs);
@@ -145,9 +178,9 @@ class AsyncEventEmitter implements EventEmitter
 
 		$argString.=' --envKeys '.escapeshellarg(json_encode($envKeys));
 		
-
 		return $argString.$envString;
 	}
+
 	protected function _out(){
 
 		//return ' 2>&1';

@@ -6,7 +6,7 @@ This implementation, handles events in a new process by using shell_exec/system 
 
 pcntl_fork is used/attempted in the handler process (which should have become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait
 
-Usage - Boilerplate
+Usage - Configuration;
 ```php
 
 require __DIR__.'/vendor/autoload.php';
@@ -57,6 +57,11 @@ if($dispatcher->shouldHandleEvent()){
 }
 
 
-// render web app, and use $dispatcher->emit($event, $eventArgs);
+// render web app ...  
+
+// $dispatcher->emit($event, $eventArgs);
+
+// schedule an event to be executed later
+// $dispatcher->schedule($event, $eventArgs, $seconds);
 
 ```
