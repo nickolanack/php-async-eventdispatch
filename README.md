@@ -31,6 +31,7 @@ if($dispatcher->shouldHandleEvent()){
 
 	$dispatcher->handleEvent(
 		array(
+			//'fork' => true,
 			'setEnvironment' => function($env){
 			
 				// these are the variables you passed to the emitter, they came back from the command line
@@ -52,7 +53,7 @@ if($dispatcher->shouldHandleEvent()){
 				
 				$listener->someEventMethod($event, $eventArgs);
 				
-			}
+			}			
 		)
 	);
 	return; //this process should be finished after executing events.
