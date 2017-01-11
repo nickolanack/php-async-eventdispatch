@@ -43,7 +43,7 @@ class EventDispatcher
 			};
 		}
 
-		f(key_exists('fork', $config)){
+		if(key_exists('fork', $config)){
 			$this->canFork=!!$config['fork'];	
 		}
 		
