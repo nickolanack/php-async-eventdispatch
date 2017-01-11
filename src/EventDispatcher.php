@@ -8,6 +8,8 @@ class EventDispatcher
 	protected $handler;
 	protected $logger;
 
+	protected $canFork=false;
+
 	public function __construct($config){
 
 		if(is_object($config)){
@@ -39,6 +41,10 @@ class EventDispatcher
 			$this->logger=function($message){
 				echo getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n";
 			};
+		}
+
+		f(key_exists('fork', $config)){
+			$this->canFork=!!$config['fork'];	
 		}
 		
 
@@ -152,7 +158,7 @@ class EventDispatcher
 
 
 			$pid=-1;
-			if(function_exists('pcntl_fork')){
+			if($this->fork&&function_exists('pcntl_fork')){
 				$pid = pcntl_fork();
 			}
 			
@@ -175,7 +181,9 @@ class EventDispatcher
 			    $this->_log('Child #'.$i.' finished');
 
 			    //need to return here or the child will also fork and execute on the next loop
-			    exit(0);
+			    while(true){
+			    	sleep(1);
+			    }
 
 			}
 
