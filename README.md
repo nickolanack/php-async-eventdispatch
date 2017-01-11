@@ -4,7 +4,9 @@ I want my web apps to be really fast, and not have the overhead of system events
 
 This implementation, handles events in a new process by using shell_exec/system commands (environment variables are passed to process from cli). All listener methods are executed in the new process and can emit thier own events (up to max recursive depth) and othewise take as long as they need.  
 
-pcntl_fork is used/attempted in the handler process (which should have become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait
+~~pcntl_fork is used/attempted in the handler process (which should have become available now that it is outside of apache) to avoid problems with multiple listeners, ie: if the first listener sleeps for some time then other listeners might have to wait~~
+unless you explicitly enable forking: 'fork' => true, when instantiating the dispatcher, forking will not be used. 
+
 
 Usage - Configuration;
 ```php
@@ -29,6 +31,7 @@ if($dispatcher->shouldHandleEvent()){
 
 	$dispatcher->handleEvent(
 		array(
+			//'fork' => true,
 			'setEnvironment' => function($env){
 			
 				// these are the variables you passed to the emitter, they came back from the command line
@@ -50,7 +53,7 @@ if($dispatcher->shouldHandleEvent()){
 				
 				$listener->someEventMethod($event, $eventArgs);
 				
-			}
+			}			
 		)
 	);
 	return; //this process should be finished after executing events.
