@@ -24,6 +24,7 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 			//things like domain name, ip address, web browser might be useful
 		);
 	}
+	//, 'log'=>function($message){} or String path
 ));
 
 if($dispatcher->shouldHandleEvent()){
@@ -33,14 +34,14 @@ if($dispatcher->shouldHandleEvent()){
 		array(
 			//'fork' => true,
 			'setEnvironment' => function($env){
-			
+		
 				// these are the variables you passed to the emitter, they came back from the command line
-				$system->setSession($env['session']);
-				$system->setUserFromAccessToken($env['access_token'])
+				$system->setSession($env->session);
+				$system->setUserFromAccessToken($env->access_token)
 				
 			},
 			'getEventListeners'=>function($event)use(&$dispatcher){
-			
+		
 				// resolve event listeners. 
 				// whatever you return here will just become available to you 
 				// in 'handleEvent' below, so it could be objects or strings, ids...
