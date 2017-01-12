@@ -21,7 +21,7 @@ class AsyncEventEmitter implements EventEmitter
 	public function __construct($config){
 	
 
-		$logFile = __DIR__  . '/.event.log';
+		$this->logPath = __DIR__  . '/.event.log';
 
 		if(is_object($config)){
 			$config=get_object_vars($config);
