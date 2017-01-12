@@ -13,7 +13,7 @@ class AsyncEventEmitter implements EventEmitter
 	protected $cmd;
 
 	protected $env;
-	protected $envKeys=array();
+
 
 	protected $environment;
 	
@@ -45,53 +45,33 @@ class AsyncEventEmitter implements EventEmitter
 
 			$longOpts=array(
 						'event:',
-						'eventArgs:',
-						'trace:', 
-						'depth:',
-						'envKeys:',
-						
 			);
-			$args = getopt('',$longOpts);
+			$option = getopt('',$longOpts);
 
 			
 
-			if (key_exists('event', $args)) {
+			if (key_exists('event', $option)) {
+
+				$args=json_decode($option['event']);
+
 
 				echo json_encode($args)."\n";
 
-				$this->event = $args['event'];
+				$this->event = $args->name;
+				$this->eventArgs = $args->arguments;
 
-				if (key_exists('eventArgs', $args)) {
-					$this->eventArgs = json_decode($args['eventArgs']);
+			
+				
+				$this->depth = (int) $args->depth;
+				if($this->depth>=6){
+					throw new Exception('Async AsyncEventEmitter reached nested event limit: '.$this->depth);
 				}
-				if (key_exists('envKeys', $args)) {
-					$this->envKeys = json_decode($args['envKeys']);
-				}
-				if (key_exists('depth', $args)) {
-					$this->depth = (int) $args['depth'];
-					if($this->depth>=6){
-						throw new Exception('Async AsyncEventEmitter reached nested event limit: '.$this->depth);
-					}
-				}
+				
 
-				if (key_exists('trace', $args)) {
-					$this->trace = $args['trace'].':'.getmypid();
-				}
+				$this->trace = $args->trace.':'.getmypid();
+	
 
-				if(!empty($this->envKeys)){
-
-					$longOptsEnv=array_map(function($k){
-						return $k.':';
-					}, $this->envKeys);
-					$envArgs=array_diff_key(getopt('', array_merge($longOpts, $longOptsEnv)), $args);
-
-					if(!empty(array_diff($this->envKeys, array_keys($envArgs)))){
-						throw new \Exception('Expected environment args matching '.json_encode($longOptsEnv));
-					}
-					echo json_encode($envArgs)."\n";
-					$this->env=$envArgs;
-
-				}
+				$this->env=$args->environment;
 
 			}	
 
@@ -161,24 +141,19 @@ class AsyncEventEmitter implements EventEmitter
 	}
 	protected function _args($event, $eventArgs){
 
-		$argString=' --event ' . escapeshellarg($event) .
-		' --eventArgs ' . escapeshellarg(json_encode($eventArgs)) .
-		' --trace ' . escapeshellarg($this->trace. '->' . $event) .
-		' --depth ' . ($this->depth + 1);
-
 		$environment=$this->environment;
-		$envKeys=array();
-		$envString='';
-		if($environment){
-			foreach($environment() as $key=>$value){
-				$envString.=' --'.$key.' '.escapeshellarg($value);
-				$envKeys[]=$key;
-			}
-		}
 
-		$argString.=' --envKeys '.escapeshellarg(json_encode($envKeys));
-		
-		return $argString.$envString;
+		$argString=' --event ' . escapeshellarg(json_encode(array(
+			'name'=>$event,
+			'arguments'=>$eventArgs,
+			'trace'=>$this->trace. '->' . $event,
+			'depth'=>$this->depth + 1,
+			'environment'=>$environment()
+		)));
+
+
+
+		return $argString;
 	}
 
 	protected function _out(){
