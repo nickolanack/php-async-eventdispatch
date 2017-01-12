@@ -36,6 +36,12 @@ class EventDispatcher
 
 		if(key_exists('log', $config)){
 			$this->logger=$config['log'];	
+			if(is_string($this->logger)){
+				$path=$config['log'];
+				$this->logger=function($message)use($path){
+					file_put_contents($path, getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
+				};
+			}
 		}
 		if(!$this->logger){
 			$this->logger=function($message){

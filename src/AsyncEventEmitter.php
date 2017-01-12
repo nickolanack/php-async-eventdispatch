@@ -13,6 +13,7 @@ class AsyncEventEmitter implements EventEmitter
 	protected $cmd;
 
 	protected $env;
+	protected $logPath;
 
 
 	protected $environment;
@@ -20,7 +21,7 @@ class AsyncEventEmitter implements EventEmitter
 	public function __construct($config){
 	
 
-
+		$logFile = __DIR__  . '/.event.log';
 
 		if(is_object($config)){
 			$config=get_object_vars($config);
@@ -35,6 +36,12 @@ class AsyncEventEmitter implements EventEmitter
 		if(key_exists('getEnvironment', $config)){
 			$this->environment=$config['getEnvironment'];
 		}
+
+		if(key_exists('log', $config)&&is_string($config['log'])){
+			$this->logPath=$config['log'];
+		}
+			
+
 
 		$this->trace=getmypid();
 		$this->depth=0;
@@ -160,8 +167,8 @@ class AsyncEventEmitter implements EventEmitter
 
 		//return ' 2>&1';
 
-		$logFile = __DIR__  . '/.event.log';
-		return ' >> ' . $logFile . ' 2>&1';
+		
+		return ' >> ' . $this->logPath . ' 2>&1';
 
 	}
 
