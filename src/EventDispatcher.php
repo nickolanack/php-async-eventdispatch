@@ -165,7 +165,7 @@ class EventDispatcher
 		}
 		ob_end_clean();
 
-		
+		$this->_log('Listeners: '.count($listeners));
 
 
 
