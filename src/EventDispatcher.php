@@ -113,7 +113,11 @@ class EventDispatcher
 		return $this->emitter->getDepth();
 	}
 
-	public function handleEvent(Handler $handler=null){
+	public function handleEvent($handler=null){
+
+		if(!($handler instanceof Handler){
+			throw new \Exception('Expected event handler to implement Handler');
+		}
 
 		if($handler){
 			$this->handler=$handler;
