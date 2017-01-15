@@ -115,7 +115,7 @@ class EventDispatcher
 
 	public function handleEvent($handler=null){
 
-		if(!($handler instanceof Handler){
+		if(!($handler instanceof Handler)){
 			throw new \Exception('Expected event handler to implement Handler');
 		}
 
