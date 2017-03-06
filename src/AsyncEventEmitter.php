@@ -127,7 +127,9 @@ class AsyncEventEmitter implements EventEmitter
 			), JSON_PRETTY_PRINT));
 
 
-		system($keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($file).$this->_out().' &');
+		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($file);
+		$cmd='/bin/bash -e -c '.escapeshellarg($keepalive);
+		system($keepalive.$this->_out().' &');
 		
 		
 
@@ -140,7 +142,9 @@ class AsyncEventEmitter implements EventEmitter
 	}
 	
 	public function getShellEventCommand($event, $eventArgs){
-		return $this->_cmd().$this->_args($event, $eventArgs);
+		$cmd= $this->_cmd().$this->_args($event, $eventArgs);
+
+		return '/bin/bash -e -c '.escapeshellarg($cmd);
 	}
 
 	protected function _cmd(){
