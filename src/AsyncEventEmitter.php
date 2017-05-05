@@ -71,7 +71,7 @@ class AsyncEventEmitter implements EventEmitter
 				
 				$this->depth = (int) $args->depth;
 				if($this->depth>=6){
-					throw new Exception('Async AsyncEventEmitter reached nested event limit: '.$this->depth);
+					throw new \Exception('Async AsyncEventEmitter reached nested event limit:'.$this->depth.'  for event: '.$this->event);
 				}
 				
 
