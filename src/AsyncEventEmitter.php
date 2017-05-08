@@ -153,13 +153,20 @@ class AsyncEventEmitter implements EventEmitter
 	protected function _args($event, $eventArgs){
 
 		$environment=$this->environment;
+		if($environment instanceof \Closure){
+			$environment=$environment();
+		}
+
+		if(empty($environment)){
+			$environment=array();
+		}
 
 		$argString=' --event ' . escapeshellarg(json_encode(array(
 			'name'=>$event,
 			'arguments'=>$eventArgs,
 			'trace'=>$this->trace. '->' . $event,
 			'depth'=>$this->depth + 1,
-			'environment'=>$environment()
+			'environment'=>$environment
 		)));
 
 
