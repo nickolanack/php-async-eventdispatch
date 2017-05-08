@@ -48,19 +48,14 @@ class AsyncEventEmitter implements EventEmitter
 
 		if (key_exists('TERM', $_SERVER)) {
 
-			
 
-			$longOpts=array(
-						'event:',
-			);
-			$option = getopt('',$longOpts);
 
-			
+			$args=$this->eventArgs();
 
-			if (key_exists('event', $option)) {
 
-				$args=json_decode($option['event']);
 
+
+			if (!empty($args)) {
 
 				echo json_encode($args)."\n";
 
@@ -84,6 +79,23 @@ class AsyncEventEmitter implements EventEmitter
 
 		}
 
+	}
+	protected function eventArgs(){
+		if (key_exists('TERM', $_SERVER)) {
+
+
+
+			if(key_exists('argv', $_SERVER)){
+
+				$i=array_search('--event', $_SERVER['argv']);
+				if($i>=0){
+					$event=$_SERVER['argv'][$i+1];
+					return json_decode($event);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public function fireEvent($event, $eventArgs){
