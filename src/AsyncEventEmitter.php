@@ -46,7 +46,7 @@ class AsyncEventEmitter implements EventEmitter
 		$this->trace=getmypid();
 		$this->depth=0;
 
-		if (key_exists('TERM', $_SERVER)) {
+		if (key_exists('TERM', $_SERVER)||php_sapi_name() === 'cli') {
 
 
 
@@ -81,7 +81,7 @@ class AsyncEventEmitter implements EventEmitter
 
 	}
 	protected function eventArgs(){
-		if (key_exists('TERM', $_SERVER)) {
+		if (key_exists('TERM', $_SERVER)||php_sapi_name() === 'cli') {
 
 
 
