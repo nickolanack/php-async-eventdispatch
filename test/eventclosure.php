@@ -76,7 +76,9 @@ if($dispatcher->shouldHandleEvent()){
 
 echo getmypid().' Event Runner Test'."\n";
 echo getmypid().' Emit testEvent'."\n";
-$dispatcher->emit('testEvent', array(
-	'hello'=>'world',
-));
+for($i=0;$i<1000;$i++){
+	$dispatcher->emit('testEvent', array(
+		'hello'=>'world',
+	));
+}
 

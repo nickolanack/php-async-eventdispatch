@@ -91,9 +91,17 @@ class AsyncEventEmitter implements EventEmitter
 
 			if(key_exists('argv', $_SERVER)){
 
+				$argv=$_SERVER['argv'];
+
 				$i=array_search('--event', $_SERVER['argv']);
-				if($i>=0){
-					$event=$_SERVER['argv'][$i+1];
+				if($i!==false){
+
+					$argi=$i+1;
+					if($argi>=count($argv)){
+						throw new \Exception('Expected event args to follow `--event` arg ('.$i.')'.print_r($argv, true));
+					}
+
+					$event=$argv[$argi];
 					return json_decode($event);
 				}
 			}
