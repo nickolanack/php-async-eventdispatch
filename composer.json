@@ -9,7 +9,6 @@
             "email": "nickblackwell82@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
     "autoload": {
         "psr-4": { "asyncevent\\": "src/" }
     }

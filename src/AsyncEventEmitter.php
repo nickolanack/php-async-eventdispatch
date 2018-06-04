@@ -82,6 +82,7 @@ class AsyncEventEmitter implements EventEmitter
 
 	}
 
+
 	public function getId(){
 		if(is_null($this->id)){
 			$this->id=getmypid();
@@ -92,6 +93,7 @@ class AsyncEventEmitter implements EventEmitter
 	public function setId($id){
 		$this->id=$id;
 	}
+
 
 	protected function isCli(){
 		return key_exists('TERM', $_SERVER)||php_sapi_name() === 'cli';
