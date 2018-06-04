@@ -20,6 +20,9 @@ class AsyncEventDispatcher extends EventDispatcher
 	}
 
 
+
+
+
 	/**
 	 * this is a helper method, in case you want to run some complicated background proccesses
 	 * here is an example

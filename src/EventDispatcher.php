@@ -102,6 +102,15 @@ class EventDispatcher
 
 	}
 
+
+	public function getId(){
+		return $this->emitter->getId();
+	}
+	public function setId($id){
+		$this->emitter->setId($id);
+	}
+
+
 	public function shouldHandleEvent(){
 		return $this->emitter->hasEvent();
 	}

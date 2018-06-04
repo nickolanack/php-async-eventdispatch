@@ -14,6 +14,7 @@ class AsyncEventEmitter implements EventEmitter
 
 	protected $env;
 	protected $logPath;
+	protected $id;
 
 
 	protected $environment;
@@ -43,24 +44,19 @@ class AsyncEventEmitter implements EventEmitter
 			
 
 
-		$this->trace=getmypid();
+		$this->trace=$this->getId();
 		$this->depth=0;
 
-		if (key_exists('TERM', $_SERVER)) {
+		if ($this->isCli()) {
 
-			
 
-			$longOpts=array(
-						'event:',
-			);
-			$option = getopt('',$longOpts);
 
-			
+			$args=$this->eventArgs();
 
-			if (key_exists('event', $option)) {
 
-				$args=json_decode($option['event']);
 
+
+			if (!empty($args)) {
 
 				echo json_encode($args)."\n";
 
@@ -75,7 +71,7 @@ class AsyncEventEmitter implements EventEmitter
 				}
 				
 
-				$this->trace = $args->trace.':'.getmypid();
+				$this->trace = $args->trace.':'.$this->getId();
 	
 
 				$this->env=$args->environment;
@@ -84,6 +80,46 @@ class AsyncEventEmitter implements EventEmitter
 
 		}
 
+	}
+
+	public function getId(){
+		if(is_null($this->id)){
+			$this->id=getmypid();
+			
+		}
+		return $this->id;
+	}
+	public function setId($id){
+		$this->id=$id;
+	}
+
+	protected function isCli(){
+		return key_exists('TERM', $_SERVER)||php_sapi_name() === 'cli';
+	}
+	protected function eventArgs(){
+		if ($this->isCli()) {
+
+
+
+			if(key_exists('argv', $_SERVER)){
+
+				$argv=$_SERVER['argv'];
+
+				$i=array_search('--event', $_SERVER['argv']);
+				if($i!==false){
+
+					$argi=$i+1;
+					if($argi>=count($argv)){
+						throw new \Exception('Expected event args to follow `--event` arg ('.$i.')'.print_r($argv, true));
+					}
+
+					$event=$argv[$argi];
+					return json_decode($event);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public function fireEvent($event, $eventArgs){
@@ -153,13 +189,20 @@ class AsyncEventEmitter implements EventEmitter
 	protected function _args($event, $eventArgs){
 
 		$environment=$this->environment;
+		if($environment instanceof \Closure){
+			$environment=$environment();
+		}
+
+		if(empty($environment)){
+			$environment=array();
+		}
 
 		$argString=' --event ' . escapeshellarg(json_encode(array(
 			'name'=>$event,
 			'arguments'=>$eventArgs,
 			'trace'=>$this->trace. '->' . $event,
 			'depth'=>$this->depth + 1,
-			'environment'=>$environment()
+			'environment'=>$environment
 		)));
 
 

@@ -20,4 +20,9 @@ interface EventEmitter
 	 */
 	public function getEnvironmentVariables();
 
+
+
+	public function getId();
+	public function setId($id);
+	
 }
