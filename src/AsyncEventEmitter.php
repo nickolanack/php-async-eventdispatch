@@ -15,6 +15,7 @@ class AsyncEventEmitter implements EventEmitter
 	protected $env;
 	protected $logPath;
 	protected $id;
+	protected $counter=0;
 
 
 	protected $environment;
@@ -58,7 +59,7 @@ class AsyncEventEmitter implements EventEmitter
 
 			if (!empty($args)) {
 
-				echo json_encode($args)."\n";
+				//echo json_encode($args)."\n";
 
 				$this->event = $args->name;
 				$this->eventArgs = $args->arguments;
@@ -85,10 +86,10 @@ class AsyncEventEmitter implements EventEmitter
 
 	public function getId(){
 		if(is_null($this->id)){
-			$this->id=getmypid();
+			$this->id=getmypid().'-'.((int)(microtime(true)*1000000));
 			
 		}
-		return $this->id;
+		return $this->id.'-'.$this->counter;
 	}
 	public function setId($id){
 		$this->id=$id;
@@ -128,9 +129,12 @@ class AsyncEventEmitter implements EventEmitter
 
 		
 
-		$bg=' &';
-		$cmd=$this->getShellEventCommand($event, $eventArgs).$this->_out().$bg;
-		system($cmd, $error);
+		// $bg=' &';
+		// $cmd=$this->getShellEventCommand($event, $eventArgs).$this->_out().$bg;
+		// system($cmd, $error);
+
+
+		$this->scheduleEvent($event, $eventArgs, 0);
 
 
 	}
@@ -141,6 +145,7 @@ class AsyncEventEmitter implements EventEmitter
 		system($cmd, $error);
 
 
+		$this->counter++;
 	}
 
 
@@ -169,6 +174,7 @@ class AsyncEventEmitter implements EventEmitter
 		$cmd='/bin/bash -e -c '.escapeshellarg($keepalive);
 		system($keepalive.$this->_out().' &');
 		
+		$this->counter++;
 		
 
 	}
