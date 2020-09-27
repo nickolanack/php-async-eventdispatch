@@ -14,6 +14,7 @@ class AsyncEventEmitter implements EventEmitter
 
 	protected $env;
 	protected $logPath;
+	protected $schedulePath;
 	protected $id;
 	protected $counter=0;
 
@@ -24,6 +25,7 @@ class AsyncEventEmitter implements EventEmitter
 	
 
 		$this->logPath = __DIR__  . '/.event.log';
+		$this->schedulePath = __DIR__ ;
 
 		if(is_object($config)){
 			$config=get_object_vars($config);
@@ -41,6 +43,10 @@ class AsyncEventEmitter implements EventEmitter
 
 		if(key_exists('log', $config)&&is_string($config['log'])){
 			$this->logPath=$config['log'];
+		}
+
+		if(key_exists('schedule', $config)&&is_string($config['schedule'])){
+			$this->schedulePath=$config['schedule'];
 		}
 			
 
@@ -182,7 +188,7 @@ class AsyncEventEmitter implements EventEmitter
 		return 'schedule'.substr(md5(time().rand(1000, 9999)), 0, 10);
 	}
 	protected function getScheduleFile($token){
-		return __DIR__.'/.'.$this->getScheduleToken().'.json';
+		return $this->schedulePath.'/.'.$this->getScheduleToken().'.json';
 	}
 	
 	public function getShellEventCommand($event, $eventArgs){
