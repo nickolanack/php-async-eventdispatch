@@ -4,7 +4,6 @@
 require dirname(__DIR__).'/vendor/autoload.php';
 
 
-
 $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 	'command'=>'php '.__FILE__, 
 	'getEnvironment'=>function(){
@@ -16,12 +15,10 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 			'ip'=>'0.0.0.0'
 		);
 	},
-	'log'=>function($message)use(&$dispatcher){
-		file_put_contents(__DIR__.'/.closure.log', str_pad('', $dispatcher->getDepth()*4).getmypid().' '.date_format(date_create(), 'Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
-	}
+	'log'=>__DIR__.'/.closure.log',
+	'schedule'=>__DIR__,
+	'handler'=>asyncevent\FileScheduler::class
 ));
-
-
 
 
 /*
@@ -43,20 +40,20 @@ if($dispatcher->shouldHandleEvent()){
 				return array(
 					function($event, $eventArgs)use(&$dispatcher){
 
-						sleep(2);
+						usleep(100);
 
 						echo getmypid().' Event listener 1 (callback function) for event (and emits recursively): '.$event.' '.json_encode($eventArgs)."\n";
 						if($event=='testEvent'){
 							echo getmypid().' Emit recursive testEvent at depth: '.$dispatcher->getDepth()."\n";
-							$dispatcher->emit('testEvent', array(
+							$dispatcher->schedule('testEvent', array(
 								'hello'=>'world', 
-							));
+							), 10);
 						}
 						
 					},
 					function($event, $eventArgs)use(&$dispatcher){
 
-						sleep(2);
+						usleep(10);
 
 						echo getmypid().' Event listener 2 (callback function)'."\n";
 						
@@ -80,5 +77,6 @@ for($i=0;$i<1000;$i++){
 	$dispatcher->emit('testEvent', array(
 		'hello'=>'world',
 	));
+	usleep(10);
 }
 

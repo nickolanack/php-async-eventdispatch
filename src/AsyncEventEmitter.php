@@ -14,18 +14,23 @@ class AsyncEventEmitter implements EventEmitter
 
 	protected $env;
 	protected $logPath;
-	protected $schedulePath;
+	
 	protected $id;
 	protected $counter=0;
 
 
 	protected $environment;
+
+
+
+	protected $handlerArg;
+	protected $handler=FileScheduler::class;
 	
 	public function __construct($config){
 	
 
 		$this->logPath = __DIR__  . '/.event.log';
-		$this->schedulePath = __DIR__ ;
+		$this->handlerArg = __DIR__ ;
 
 		if(is_object($config)){
 			$config=get_object_vars($config);
@@ -46,10 +51,12 @@ class AsyncEventEmitter implements EventEmitter
 		}
 
 		if(key_exists('schedule', $config)&&is_string($config['schedule'])){
-			$this->schedulePath=$config['schedule'];
+			$this->handlerArg=$config['schedule'];
 		}
 			
-
+		if(key_exists('handler', $config)&&is_string($config['schedule'])){
+			$this->handler=$config['handler'];
+		}
 
 		$this->trace=$this->getId();
 		$this->depth=0;
@@ -155,46 +162,45 @@ class AsyncEventEmitter implements EventEmitter
 	}
 
 
+	protected function getScheduleToken(){
+		return 'schedule'.microtime().'-'.substr(md5(time().rand(1000, 9999)), 0, 10);
+	}
+
 	public function scheduleEvent($event, $eventArgs, $secondsFromNow){
 
 		$now=time();
 		$time=$now+$secondsFromNow;
 
-		while(file_exists($file=$this->getScheduleFile($token=$this->getScheduleToken()))){}
+		
 
+		$handlerClass=$this->handler;
+		$handler=new $handlerClass($this->handlerArg);
+		$token=$this->getScheduleToken();
 
-		file_put_contents($file, 
-			json_encode(array(
+		$schedule=$handler->createSchedule(array(
 				'schedule'=>array(
 					'dispatched'=>$now,
 					'time'=>$time,
 					'token'=>$token
 				),
-
 				'cmd'=>$this->getShellEventCommand($event, $eventArgs).$this->_out().' &'
 
-			), JSON_PRETTY_PRINT));
+			), $token);
 
 
-		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($file);
-		$cmd='/bin/bash -e -c '.escapeshellarg($keepalive);
+		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
+		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
 		system($keepalive.$this->_out().' &');
 		
 		$this->counter++;
 		
 
 	}
-	protected function getScheduleToken(){
-		return 'schedule'.substr(md5(time().rand(1000, 9999)), 0, 10);
-	}
-	protected function getScheduleFile($token){
-		return $this->schedulePath.'/.'.$this->getScheduleToken().'.json';
-	}
-	
+
 	public function getShellEventCommand($event, $eventArgs){
 		$cmd= $this->_cmd().$this->_args($event, $eventArgs);
 
-		return '/bin/bash -e -c '.escapeshellarg($cmd);
+		return 'nice -n 20 /bin/bash -e -c '.escapeshellarg($cmd);
 	}
 
 	protected function _cmd(){

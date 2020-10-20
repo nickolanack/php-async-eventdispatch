@@ -13,11 +13,8 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 			'thetime'=>time()
 		);
 	},
-	'log'=>function($message)use(&$dispatcher){
-
-		file_put_contents(__DIR__.'/.schedule.log', str_pad('', $dispatcher->getDepth()*4).getmypid().' '.date('Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND);
-
-	}
+	'log'=>__DIR__.'/.schedule.log',
+	'handler'=>asyncevent\FileScheduler::class
 ));
 
 if($dispatcher->shouldHandleEvent()){
