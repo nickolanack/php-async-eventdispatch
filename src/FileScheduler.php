@@ -9,6 +9,11 @@ class FileScheduler extends Scheduler {
 
 	public function __construct($folder) {
 
+
+		if(!(is_file($folder)||is_dir($folder))){
+			throw new \Exception('Path does not exist: '.$folder);
+		}
+
 		if(is_file($folder)&&(!is_dir($folder))){
 			$folder=dirname($folder);
 		}
