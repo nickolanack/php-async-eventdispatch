@@ -49,9 +49,9 @@ echo getmypid().' Schedule Throttle Test'."\n";
 echo getmypid().' Event name: testEvent'."\n";
 
 
-for($i=0;$i<100;$i++){
+for($i=0;$i<1000;$i++){
 	$dispatcher->throttle('testEvent', array(
 		'hello'=>'world',
-	), array(), rand(10, 100));
+	), array(), rand(10, 500));
 }
 
