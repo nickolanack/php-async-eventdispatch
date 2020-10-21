@@ -129,7 +129,7 @@ class FileScheduler extends Scheduler {
 
 		return array_values(
 			array_filter(scandir($this->dir), function($file){
-				if(strpos($file, '.pid-', )===0){
+				if(strpos($file, '.pid-')===0){
 					return true;
 				}
 				return false;
