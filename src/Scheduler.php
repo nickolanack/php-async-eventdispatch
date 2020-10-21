@@ -10,7 +10,7 @@ abstract class Scheduler {
 	public function run($scheduleName) {
 
 		if(!$this->lockEvent($scheduleName)){
-			echo echo getmypid() . "Already Locked";
+			echo getmypid() . "Already Locked";
 			return $this;
 		}
 		$schedule = $this->getScheduleData($scheduleName);
