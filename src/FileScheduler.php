@@ -61,7 +61,7 @@ class FileScheduler extends Scheduler {
 						return false;
 					}
 
-					if(strpos($file, '.queue', )===0){
+					if(strpos($file, '.queue')===0){
 						return strpos($file, '.lock')===false&&(!file_exists($file.'.lock'));
 					}
 					return false;
