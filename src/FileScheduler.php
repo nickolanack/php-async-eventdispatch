@@ -56,7 +56,7 @@ class FileScheduler extends Scheduler {
 			$this->queuedItems=array_values(
 				array_filter(scandir($this->dir), function($file){
 
-					if(strpos($file, '.schedule', )===0){
+					if(strpos($file, '.schedule')===0){
 						$this->queue($this->dir.'/'.$file);
 						return false;
 					}
