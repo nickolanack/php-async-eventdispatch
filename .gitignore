@@ -1,6 +1,8 @@
 /vendor
 ._*
 src/.schedule*.json
-test/.closure.log
-test/.schedule.log
 src/.event.log
+test/.closure.log
+test/exampleEvent.json
+test/.throttle.*
+test/.schedule.log

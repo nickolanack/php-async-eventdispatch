@@ -5,24 +5,33 @@ namespace asyncevent;
 class FileScheduler extends Scheduler {
 
 	protected $dir;
-	protected $queuedItems=array();
+	protected $fp=null;
+	
 
 	public function __construct($folder) {
+
+		if(strpos($folder, '.json')){
+			$folder=dirname($folder);
+		}
+
+		if(is_dir($folder)){
+			$this->dir=$folder;
+			return;
+		}
+
+
 
 
 		if(!(is_file($folder)||is_dir($folder))){
 			throw new \Exception('Path does not exist: '.$folder);
 		}
 
-		if(is_file($folder)&&(!is_dir($folder))){
-			$folder=dirname($folder);
+		if(!is_dir(dirname($folder))){
+			throw new \Exception('Not a valid folder: '.$folder);
 		}
 
-		if(!is_dir($folder)){
-			throw new \Exception('Not a folder: '.$folder);
-		}
+		$this->dir=dirname($folder);
 
-		$this->dir = $folder;
 	}
 
 	public function createSchedule($scheduleData, $token){
@@ -35,6 +44,18 @@ class FileScheduler extends Scheduler {
 	}
 
 
+	protected function getLastThrottledExecution($eventName){
+		$throttle = $this->dir . '/.throttle.' .$eventName.'.last';
+		if(!file_exists($throttle)){
+			return -1;
+		}
+		return filemtime($throttle);
+	}
+	protected function markThrottledExecution($eventName){
+		$throttle = $this->dir . '/.throttle.' .$eventName.'.last';
+		touch($throttle);
+	}
+
 	
 	protected function getScheduleFile($token){
 		return $this->dir.'/.'.$token.'.json';
@@ -46,52 +67,64 @@ class FileScheduler extends Scheduler {
 		$file = $scheduleName;
 
 		$queue = dirname($file) . '/.queue' . microtime() . '-' . substr(md5(time() . rand(1000, 9999)), 0, 10) . '.json';
-		rename($file, $queue);
+		if(file_exists($file)){
+			rename($file, $queue);
+		}
 		return $this;
 
 	}
 
 
-	protected function getNextQueuedEvent(){
+	protected function getSchedules(){
 		
 
 
-		if(count($this->queuedItems)==0){
-			
-			$this->queuedItems=array_values(
-				array_filter(scandir($this->dir), function($file){
+		
+		return array_values(
+			array_filter(scandir($this->dir), function($file){
 
-					if(strpos($file, '.schedule')===0){
-						$this->queue($this->dir.'/'.$file);
-						return false;
-					}
-
-					if(strpos($file, '.queue')===0){
-						return strpos($file, '.lock')===false&&(!file_exists($file.'.lock'));
-					}
+				if(strpos($file, '.schedule')===0){
+					$this->queue($this->dir.'/'.$file);
 					return false;
-				})
-			);
-		}
+				}
 
-		if(count($this->queuedItems)==0){
-			return false;
-		}
+				if(strpos($file, '.queue')===0){
+					return strpos($file, '.lock')===false&&(!file_exists($file.'.lock'));
+				}
+				return false;
+			})
+		);
+			
+		
 
-		return $this->dir.'/'.array_shift($this->queuedItems);
 	}
 	protected function lockEvent($scheduleName){
 		$file = $scheduleName;
 		if(file_exists($file.'.lock')){
 			return false;
 		}
-		return file_put_contents($file.'.lock', getmypid())!==false;
+		if(!file_put_contents($file.'.lock', getmypid())){
+			return false;
+		}
+
+		$this->fp=fopen($file.'.lock', 'r+');
+		if (flock($this->fp, LOCK_EX | LOCK_NB)) {
+	        return true;
+	    } 
+
+        fclose($this->fp);
+        $this->fp=null;
+        return false;
+	    
 
 	}
 
 	protected function getScheduleData($scheduleName) {
 
 		$file = $scheduleName;
+		if(!file_exists($file)){
+			return null;
+		}
 		$schedule = json_decode(file_get_contents($file));
 		return $schedule;
 	}
@@ -125,7 +158,14 @@ class FileScheduler extends Scheduler {
 
 	protected function remove($scheduleName) {
 		$file = $scheduleName;
+
 		unlink($file);
+
+		if($this->fp){
+			flock($this->fp, LOCK_UN);
+			fclose($this->fp);
+			$this->fp=null;
+		}
 		unlink($file.'.lock');
 	}
 

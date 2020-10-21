@@ -86,6 +86,51 @@ class EventDispatcher
 		$this->_log('Done emitting: '.$event);
 	}
 
+
+	/**
+	 * Throttle event allows an event to be scheduled (or emitted immediatly) while 
+	 * discarding simultanous events with the same name
+	 *
+	 * a throttled event is discarded if the last event occurred within {throttleOptions->interval} seconds
+	 * instead of discarding the event. it will instead be rescheduled if {throttleOptions->reschedule} is true
+	 * 
+	 * 
+	 */
+	public function throttle($event, $eventArgs, $throttleOptions=array(), $secondsFromNow=0){
+		
+		
+
+		/**
+		 * add additional supported throttle options
+		 */
+
+		$throttleOptions=array_merge(array(
+			'interval'=>30,
+			'reschedule'=>false
+		),array_intersect_key($throttleOptions, array(
+			'interval'=>'',
+			'reschedule'=>''
+		)));
+
+		$throttleOptions['interval']=max(1, intval($throttleOptions['interval'])); //force int.
+		$throttleOptions['reschedule']=!!$throttleOptions['reschedule']; //force boolean
+
+
+
+		$this->_log('Begin throttled event: '.$event.'('.json_encode($eventArgs).') ('.json_encode($throttleOptions).')');
+		ob_start();
+
+		$this->emitter->throttleEvent($event, $eventArgs, $throttleOptions, $secondsFromNow);
+
+		$content=trim(ob_get_contents());
+		if(!empty($content)){
+			$this->_log($content);
+		}
+		ob_end_clean();
+		$this->_log('Done throttled event: '.$event);
+
+	}
+
 	public function schedule($event, $eventArgs, $secondsFromNow){
 		
 		$this->_log('Begin scheduling: '.$event.'('.json_encode($eventArgs).')');
@@ -210,7 +255,7 @@ class EventDispatcher
 			}
 			
 			if ($pid == -1) {
-			    $this->_log('Unable to fork');
+			    //$this->_log('Unable to fork');
 			    $this->_executeHandler($listener, $event, $eventArgs);
 
 			} else if ($pid) {

@@ -20,7 +20,7 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 
 if($dispatcher->shouldHandleEvent()){
 
-	echo getmypid().' Should Handle'."\n";
+	//echo getmypid().' Should Handle'."\n";
 	$dispatcher->handleEvent(
 		array(
 			'setEnvironment' => function($env){
@@ -31,7 +31,7 @@ if($dispatcher->shouldHandleEvent()){
 				return array(
 					function($event, $eventArgs)use(&$dispatcher){
 
-						echo 'Event '.date('H:i:s');
+						echo 'Event handler message: '.date('H:i:s');
 					
 					}
 				);
@@ -45,14 +45,13 @@ if($dispatcher->shouldHandleEvent()){
 	return; 
 }
 
-echo getmypid().' Schedule Runner Test'."\n";
-echo getmypid().' Schedule testEvent'."\n";
+echo getmypid().' Schedule Throttle Test'."\n";
+echo getmypid().' Event name: testEvent'."\n";
 
-echo 'Expected Event: '.date('H:i:s', time()+50);
 
 for($i=0;$i<100;$i++){
-	$dispatcher->schedule('testEvent', array(
+	$dispatcher->throttle('testEvent', array(
 		'hello'=>'world',
-	), rand(100, 150));
+	), array(), rand(10, 100));
 }
 

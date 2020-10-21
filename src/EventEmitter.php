@@ -7,6 +7,9 @@ interface EventEmitter
 	public function fireEvent($event, $data);
 	public function fireEventSync($event, $data);
 
+	public function scheduleEvent($event, $eventArgs, $secondsFromNow);
+	public function throttleEvent($event, $eventArgs, $throttleOptions, $secondsFromNow=0);
+
 	public function hasEvent();
 	public function getEvent();
 	public function getTrace();

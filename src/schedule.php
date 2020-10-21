@@ -16,7 +16,7 @@ $args = getopt('', $longOpts);
 $schedule = $args['schedule'];
 
 
-echo ($schedule)."\n";
+//echo ($schedule)."\n";
 
 if(array_key_exists('handler', $args)){
 
@@ -26,7 +26,7 @@ if(array_key_exists('handler', $args)){
 
 
 
-	error_log($class);
+	//error_log($class);
 
 	(new $class($schedule))
 	//->run($file);
@@ -36,7 +36,7 @@ if(array_key_exists('handler', $args)){
 	return;
 }
 
-error_log( "Using default: ".json_encode($args));
+//error_log( "Using default: ".json_encode($args));
 
 
 (new \asyncevent\FileScheduler($schedule))
