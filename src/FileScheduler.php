@@ -72,7 +72,7 @@ class FileScheduler extends Scheduler {
 
 	public function queue($scheduleName) {
 
-		$file = $scheduleName;
+		$file = $this->dir.'/'.$scheduleName;
 
 		$queue = dirname($file) . '/.queue' . microtime() . '-' . substr(md5(time() . rand(1000, 9999)), 0, 10) . '.json';
 		if(file_exists($file)){
@@ -88,28 +88,26 @@ class FileScheduler extends Scheduler {
 
 
 		
-		return array_map(function($file){
-			return $this->dir.'/'.$file;
-		},array_values(
+		return array_values(
 			array_filter(scandir($this->dir), function($file){
 
 				if(strpos($file, '.schedule')===0){
-					$this->queue($this->dir.'/'.$file);
+					$this->queue($file);
 					return false;
 				}
 
 				if(strpos($file, '.queue')===0){
-					return strpos($file, '.lock')===false&&(!file_exists($file.'.lock'));
+					return strpos($file, '.lock')===false&&(!file_exists($this->dir.'/'.$file.'.lock'));
 				}
 				return false;
 			})
-		));
+		);
 			
 		
 
 	}
 	protected function lockEvent($scheduleName){
-		$file = $scheduleName;
+		$file = $this->dir.'/'.$scheduleName;
 		if(file_exists($file.'.lock')){
 			return false;
 		}
@@ -134,7 +132,7 @@ class FileScheduler extends Scheduler {
 
 	protected function getScheduleData($scheduleName) {
 
-		$file = $scheduleName;
+		$file = $this->dir.'/'.$scheduleName;
 		if(!file_exists($file)){
 			return null;
 		}
@@ -150,7 +148,7 @@ class FileScheduler extends Scheduler {
 
 	protected function updateProcess($scheduleName, $scheduleData) {
 
-		$file = $scheduleName;
+		$file = $this->dir.'/'.$scheduleName;
 		$schedule = $scheduleData;
 
 		if (!file_exists($file)) {
@@ -176,7 +174,7 @@ class FileScheduler extends Scheduler {
 	}
 
 	protected function remove($scheduleName) {
-		$file = $scheduleName;
+		$file = $this->dir.'/'.$scheduleName;
 
 		unlink($file);
 

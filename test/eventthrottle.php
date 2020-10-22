@@ -13,9 +13,9 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 			'thetime'=>time()
 		);
 	},
-	'log'=>dirname(__DIR__).'/.schedule.log',
+	'log'=>__DIR__.'/.schedule.log',
 	'handler'=>asyncevent\FileScheduler::class,
-	'schedule'=>__DIR__
+	'schedule'=>__DIR__.'/schedules'
 ));
 
 if($dispatcher->shouldHandleEvent()){
@@ -49,7 +49,7 @@ echo getmypid().' Schedule Throttle Test'."\n";
 echo getmypid().' Event name: testEvent'."\n";
 
 
-for($i=0;$i<1000;$i++){
+for($i=0;$i<50;$i++){
 	$dispatcher->throttle('testEvent', array(
 		'hello'=>'world',
 	), array(), rand(10, 500));

@@ -160,7 +160,7 @@ abstract class Scheduler {
 
 			$this->sortQueuedItems();
 
-			//echo getmypid() . ': Preparing shedules: '.count($this->queuedItems).' items after sort,map'. "\n";
+			echo getmypid() . ': Preparing shedules: '.count($this->queuedItems).' items after sort,map'. "\n";
 
 		}
 
@@ -168,7 +168,7 @@ abstract class Scheduler {
 			return false;
 		}
 
-		return $this->dir.'/'.array_shift($this->queuedItems);
+		return array_shift($this->queuedItems);
 	}
 
 
