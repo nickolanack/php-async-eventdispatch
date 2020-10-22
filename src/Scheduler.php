@@ -156,11 +156,11 @@ abstract class Scheduler {
 
 			$this->queuedItems=$this->getSchedules();
 
-			echo getmypid() . ': Refresh shedules: '.count($this->queuedItems).' items'. "\n";
+			//echo getmypid() . ': Refresh shedules: '.count($this->queuedItems).' items'. "\n";
 
 			$this->sortQueuedItems();
 
-			echo getmypid() . ': Preparing shedules: '.count($this->queuedItems).' items after sort,map'. "\n";
+			//echo getmypid() . ': Preparing shedules: '.count($this->queuedItems).' items after sort,map'. "\n";
 
 		}
 
@@ -185,7 +185,7 @@ abstract class Scheduler {
 			}	
 		}
 
-		echo getmypid() . ': Sorting: map: '.json_encode(array_keys($this->queuedItemsData)). "\n";
+		//echo getmypid() . ': Sorting: map: '.json_encode(array_keys($this->queuedItemsData)). "\n";
 
 		$this->queuedItemsData=array_intersect_key($this->queuedItemsData, array_combine($this->queuedItems, $this->queuedItems));
 		$this->queuedItems=array_intersect($this->queuedItems, array_keys($this->queuedItemsData));
