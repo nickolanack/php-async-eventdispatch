@@ -177,11 +177,15 @@ abstract class Scheduler {
 			if(!key_exists($scheduleName , $this->queuedItemsData)){
 				$data=$this->getScheduleData($scheduleName);
 				if(!is_null($data)){
-					echo getmypid() . ': Sorting: Null data: '.$scheduleName. "\n";
 					$this->queuedItemsData[$scheduleName]=$data;
+
+				}else{
+					echo getmypid() . ': Sorting: Null data: '.$scheduleName. "\n";
 				}
 			}	
 		}
+
+		echo getmypid() . ': Sorting: map: '.json_encode(array_keys($this->queuedItemsData)). "\n";
 
 		$this->queuedItemsData=array_intersect_key($this->queuedItemsData, array_combine($this->queuedItems, $this->queuedItems));
 		$this->queuedItems=array_intersect($this->queuedItems, array_keys($this->queuedItemsData));
