@@ -187,7 +187,6 @@ abstract class Scheduler {
 	public function startProcessingLoop(){
 
 		$this->registerScheduler();
-		echo getmypid() . ': Start Processor' . "\n";
 
 		$loops=0;
 		$counter=0;
@@ -216,10 +215,10 @@ abstract class Scheduler {
 
 		}
 
-		echo getmypid() . ': Processed '.$counter. ' items' . "\n";
+		echo getmypid() . ': Processed '.$counter. ' items, Ran '. $loops.' loops' . "\n";
 
 		$this->unregisterScheduler();
-		echo getmypid() . ': Ending Processor. Ran '. $loops.' loops' . "\n";
+		
 	}
 
 
@@ -228,8 +227,9 @@ abstract class Scheduler {
 
 		$this->lastExecutedTime=time();
 		if(count($this->getRegisteredSchedulerPids())<$this->maxProcesses){
-			
+			echo getmypid() . ': Start Processor' . "\n";
 			$this->startProcessingLoop();
+			echo getmypid() . ': Ending Processor' . "\n";
 		}
 
 

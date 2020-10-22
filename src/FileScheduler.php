@@ -34,6 +34,14 @@ class FileScheduler extends Scheduler {
 
 	}
 
+
+	public function startProcessingLoop(){
+
+		echo getmypid() . ' FileScheduler: Schedule path: '.$this->dir.', '.count($this->getSchedules()).' Items'. "\n";
+
+		parent::startProcessingLoop();
+	}
+
 	public function createSchedule($scheduleData, $token){
 
 		while(file_exists($file=$this->getScheduleFile($token))){}
@@ -108,11 +116,14 @@ class FileScheduler extends Scheduler {
 		}
 
 		$this->fp=fopen($file.'.lock', 'r+');
-		if (flock($this->fp, LOCK_EX | LOCK_NB)) {
+	
+		if ($this->fp!==false&&flock($this->fp, LOCK_EX | LOCK_NB)) {
 	        return true;
 	    } 
 
-        fclose($this->fp);
+	    if($this->fp!==false){
+        	fclose($this->fp);
+   	 	}
         $this->fp=null;
         return false;
 	    
