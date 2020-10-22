@@ -125,7 +125,13 @@ class FileScheduler extends Scheduler {
 		if(!file_exists($file)){
 			return null;
 		}
-		$schedule = json_decode(file_get_contents($file));
+		$content=file_get_contents($file);
+		$schedule = json_decode($content);
+
+		if(is_null($schedule)&&!empty($content)){
+			echo getmypid() . ' FileScheduler: Invalid json: '.$scheduleName."\n";
+		}
+
 		return $schedule;
 	}
 
