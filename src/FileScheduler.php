@@ -88,7 +88,9 @@ class FileScheduler extends Scheduler {
 
 
 		
-		return array_values(
+		return array_map(function($file){
+			return $this->dir.'/'.$file;
+		},array_values(
 			array_filter(scandir($this->dir), function($file){
 
 				if(strpos($file, '.schedule')===0){
@@ -101,7 +103,7 @@ class FileScheduler extends Scheduler {
 				}
 				return false;
 			})
-		);
+		));
 			
 		
 
