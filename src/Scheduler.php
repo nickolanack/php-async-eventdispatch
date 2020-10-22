@@ -135,7 +135,7 @@ abstract class Scheduler {
 	public function shouldRunNow($scheduleName){
 
 		$schedule = $this->getScheduleData($scheduleName);
-		if(is_null($schedule)){
+		if(is_null($schedule))
 			return false;
 		}
 		$time = $schedule->schedule->time;
@@ -151,9 +151,17 @@ abstract class Scheduler {
 
 
 		if(count($this->queuedItems)==0){
-			
+				
+
+
 			$this->queuedItems=$this->getSchedules();
+
+			echo getmypid() . ': Refresh shedules: '.count($this->queuedItems).' items'. "\n";
+
 			$this->sortQueuedItems();
+
+			echo getmypid() . ': Preparing shedules: '.count($this->queuedItems).' items after sort,map'. "\n";
+
 		}
 
 		if(count($this->queuedItems)==0){
