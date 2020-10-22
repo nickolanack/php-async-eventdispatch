@@ -135,7 +135,7 @@ abstract class Scheduler {
 	public function shouldRunNow($scheduleName){
 
 		$schedule = $this->getScheduleData($scheduleName);
-		if(is_null($schedule))
+		if(is_null($schedule)){
 			return false;
 		}
 		$time = $schedule->schedule->time;
@@ -174,9 +174,10 @@ abstract class Scheduler {
 
 	protected function sortQueuedItems(){
 		foreach ($this->queuedItems as $scheduleName) {
-			if(!key_exists($scheduleName ,$this->queuedItemsData)){
+			if(!key_exists($scheduleName , $this->queuedItemsData)){
 				$data=$this->getScheduleData($scheduleName);
 				if(!is_null($data)){
+					echo getmypid() . ': Sorting: Null data: '.$scheduleName. "\n";
 					$this->queuedItemsData[$scheduleName]=$data;
 				}
 			}	

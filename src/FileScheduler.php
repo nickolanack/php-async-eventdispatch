@@ -162,14 +162,14 @@ class FileScheduler extends Scheduler {
 	protected function registerScheduler() {
 
 		touch($this->dir . '/.pid-' . getmypid());
-		echo "Start Scheduler: ".$this->dir.": ".getmypid();
+		echo getmypid().": Register Scheduler: ".$this->dir.": ".getmypid();
 
 	}
 
 	protected function unregisterScheduler() {
 
 		unlink($this->dir . '/.pid-' . getmypid());
-		echo "Stop Scheduler: ".$this->dir.": ".getmypid();
+		echo getmypid().": Unregister Scheduler: ".$this->dir.": ".getmypid();
 
 	}
 
