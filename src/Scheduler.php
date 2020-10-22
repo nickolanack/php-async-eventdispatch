@@ -175,6 +175,7 @@ abstract class Scheduler {
 		}
 
 		$this->queuedItemsData=array_intersect_key($this->queuedItemsData, array_combine($this->queuedItems, $this->queuedItems));
+		$this->queuedItems=array_intersect($this->queuedItems, array_keys($this->queuedItemsData));
 
 		usort($this->queuedItems, function($a, $b){
 			return $this->queuedItemsData[$a]->schedule->time-$this->queuedItemsData[$b]->schedule->time;
