@@ -167,7 +167,10 @@ abstract class Scheduler {
 	protected function sortQueuedItems(){
 		foreach ($this->queuedItems as $scheduleName) {
 			if(!key_exists($scheduleName ,$this->queuedItemsData)){
-				$this->queuedItemsData[$scheduleName]=$this->getScheduleData($scheduleName);
+				$data=$this->getScheduleData($scheduleName);
+				if(!is_null($data)){
+					$this->queuedItemsData[$scheduleName]=$data;
+				}
 			}	
 		}
 

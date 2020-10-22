@@ -55,7 +55,7 @@ class EventDispatcher
 		
 
 	}
-
+	
 
 	public function emit($event, $eventArgs){
 
