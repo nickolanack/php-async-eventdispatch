@@ -190,10 +190,11 @@ abstract class Scheduler {
 
 		$loops=0;
 		$counter=0;
+		$checked=0;
 		while(true){
 			$loops++;
 			while($scheduleName=$this->getNextQueuedEvent()){
-
+				$checked++;
 				if(!$this->shouldRunNow($scheduleName)){
 					//echo getmypid() . ': Skip: ' .$scheduleName. "\n";
 					usleep(50000);
@@ -215,7 +216,7 @@ abstract class Scheduler {
 
 		}
 
-		echo getmypid() . ': Processed '.$counter. ' items, Ran '. $loops.' loops' . "\n";
+		echo getmypid() . ': Processed '.$counter. '/'.$checked.' items, Ran '. $loops.' loops' . "\n";
 
 		$this->unregisterScheduler();
 		
