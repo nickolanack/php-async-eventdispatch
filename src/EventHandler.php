@@ -16,16 +16,31 @@ class EventHandler extends Handler
 			$config=get_object_vars($config);
 		}
 
-		if(!key_exists('getEventListeners', $config)){
-			throw new \Exception('EventHandler requires getEventListeners parameter');
-		}
+		
 
 		if(!key_exists('handleEvent', $config)){
 			throw new \Exception('EventHandler requires handleEvent parameter');
 		}
-
-		$this->getListeners=$config['getEventListeners'];
 		$this->handler=$config['handleEvent'];
+
+
+
+		if(!key_exists('getEventListeners', $config)){
+
+			/**
+			 * generally when used as a dispatcher different handlers or listeners are 
+			 * expected to be resolved by the getEventListeners arg. However, this is optional
+			 * to support very simple schedule applications
+			 *
+			 * if no getEventListeners method is defined. a default listener ($this) is resolved 
+			 * so that the handleEvent method recieves a single execution with a null $listener argument
+			 */
+
+			error_log('EventHandler expects getEventListeners parameter');
+			//throw new \Exception('EventHandler requires getEventListeners parameter');
+		}else{
+			$this->getListeners=$config['getEventListeners'];
+		}
 
 		if(key_exists('setEnvironment', $config)){
 			$this->environment=$config['setEnvironment'];
@@ -49,6 +64,11 @@ class EventHandler extends Handler
 	public function getEventListeners($event){
 
 		$getListeners=$this->getListeners;
+
+		if(is_null($getListeners)){
+			return [$this];
+		}
+
 		return $getListeners($event);
 
 	}

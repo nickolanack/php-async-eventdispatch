@@ -131,6 +131,26 @@ class EventDispatcher
 
 	}
 
+	/**
+
+	 */
+	public function scheduleInterval($event, $eventArgs, $intervalSeconds=0){
+		
+
+		$this->_log('Begin interval event: '.$event.'('.json_encode($eventArgs).')');
+		ob_start();
+
+		$this->emitter->scheduleEventInterval($event, $eventArgs, $intervalSeconds);
+
+		$content=trim(ob_get_contents());
+		if(!empty($content)){
+			$this->_log($content);
+		}
+		ob_end_clean();
+		$this->_log('Done interval event: '.$event);
+
+	}
+
 	public function schedule($event, $eventArgs, $secondsFromNow){
 		
 		$this->_log('Begin scheduling: '.$event.'('.json_encode($eventArgs).')');

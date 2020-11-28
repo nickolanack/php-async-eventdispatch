@@ -68,16 +68,42 @@ abstract class Scheduler {
 
 
 		echo getmypid() . ': Trigger Event ' . time(). ' ('.$schedule->schedule->time.')'."\n";
-		system($schedule->cmd);
+		
+		system($schedule->cmd, $returnVar);
+
+		if($returnVar!==0){
+			echo getmypid() . ': Event returned nonzero result ' . time(). ' ('.$returnVar.')'."\n";
+		}
+
 		
 		if(key_exists('throttle', $schedule->schedule)){
 			$this->markThrottledExecution($schedule->schedule->name);
 		}
+
+
 		
 		$this->lastExecutedTime=time();
 		//echo getmypid() . ': Remove Schedule' . "\n";
 		$this->remove($scheduleName);
 		//echo getmypid() . ': Cleanup' . "\n";
+
+		if(key_exists('interval', $schedule->schedule)){
+
+			$time=$schedule->schedule->time+$schedule->schedule->interval;
+			$token=$schedule->schedule->token;
+
+
+			/**
+			 * edge case. events could start to stack up if the event processing time is longer than the interval
+			 */
+
+			$schedule->schedule=array_merge(get_object_vars($schedule->schedule), array(
+				'time'=>$time,
+			));
+
+
+			$this->createSchedule($schedule, $token);
+		}
 
 
 		return $this;
@@ -219,6 +245,8 @@ abstract class Scheduler {
 				usleep(100000);
 				$counter++;
 			}
+
+
 			
 			usleep(200000);
 

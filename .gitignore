@@ -1,8 +1,11 @@
-/vendor
+src/.pid*
 ._*
-src/.schedule*.json
+test/.throttle.*
+/vendor
+src/.queue*
 src/.event.log
 test/.closure.log
 test/exampleEvent.json
-test/.throttle.*
+src/.schedule*.json
 test/.schedule.log
+/test/schedules

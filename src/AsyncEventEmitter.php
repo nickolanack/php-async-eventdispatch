@@ -198,6 +198,39 @@ class AsyncEventEmitter implements EventEmitter
 
 	}
 
+	public function scheduleEventInterval($event, $eventArgs, $secondsFromNow){
+
+		$now=time();
+		$time=$now+$secondsFromNow;
+
+		
+
+		$handlerClass=$this->handler;
+		$handler=new $handlerClass($this->handlerArg);
+		$token=$this->getScheduleToken();
+
+		$schedule=$handler->createSchedule(array(
+				'schedule'=>array(
+					'name'=>$event,
+					'dispatched'=>$now,
+					'time'=>$time,
+					'token'=>$token,
+					'interval'=> $secondsFromNow
+				),
+				'cmd'=>$this->getShellEventCommand($event, $eventArgs).$this->_out().' &'
+
+			), $token);
+
+
+		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
+		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
+		system($keepalive.$this->_out().' &');
+		
+		$this->counter++;
+		
+
+	}
+
 	public function throttleEvent($event, $eventArgs, $throttleOptions, $secondsFromNow=0){
 
 		$now=time();
