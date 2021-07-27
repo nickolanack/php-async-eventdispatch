@@ -187,9 +187,59 @@ class FileScheduler extends Scheduler {
 	}
 
 
+	private function checkPid($pids){
+
+
+		$pid=$pids[rand(0,count($pids)-1)];
+
+		$pid=explode('-', $pid);
+		$pid=array_pop($pid);
+		$pid=intval($pid);
+
+		if(function_exists('posix_getpgid')){
+
+
+			if(!posix_getpgid($pid)){
+				$this->checkAllPids($pids);
+				return;
+			}
+
+			return;
+		}
+
+		if(!file_exists('/proc/'.$pid)){
+			$this->checkAllPids();
+		}
+	}
+
+	private function checkAllPids($pids){
+		foreach($pids as $pid){
+
+			$pid=explode('-', $pid);
+			$pid=array_pop($pid);
+			$pid=intval($pid);
+
+
+
+			if(function_exists('posix_getpgid')){
+
+				if(!posix_getpgid($pid)){
+					unlink($this->dir . '/.pid-' . $pid);
+				}
+				continue;
+			}
+
+			if(!file_exists('/proc/'.$pid)){
+				unlink($this->dir . '/.pid-' . $pid);
+			}
+		}
+		
+	}
+
+
 	protected function getRegisteredSchedulerPids(){
 
-		return array_values(
+		$pids= array_values(
 			array_filter(scandir($this->dir), function($file){
 				if(strpos($file, '.pid-')===0){
 					return true;
@@ -197,6 +247,10 @@ class FileScheduler extends Scheduler {
 				return false;
 			})
 		);
+
+		$this->checkPid($pids);
+
+		return $pids;
 
 	}
 }

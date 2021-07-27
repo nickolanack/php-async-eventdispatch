@@ -89,13 +89,18 @@ abstract class Scheduler {
 
 		if(key_exists('interval', $schedule->schedule)){
 
-			$time=$schedule->schedule->time+$schedule->schedule->interval;
-			$token=$schedule->schedule->token;
 
 
 			/**
 			 * edge case. events could start to stack up if the event processing time is longer than the interval
 			 */
+
+			$time=$schedule->schedule->time+$schedule->schedule->interval;
+			$now=time();
+			if($time<$now){
+				echo getmypid() . ': Event Overlap '."\n";
+			}
+			$token=$schedule->schedule->token;
 
 			$schedule->schedule=array_merge(get_object_vars($schedule->schedule), array(
 				'time'=>$time,
