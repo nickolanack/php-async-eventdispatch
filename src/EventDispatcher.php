@@ -59,7 +59,7 @@ class EventDispatcher
 
 	public function emit($event, $eventArgs){
 
-		$this->_log('Begin emitting: '.$event.'('.json_encode($eventArgs).')');
+		//$this->_log('Begin emitting: '.$event.'('.json_encode($eventArgs).')');
 		ob_start();
 
 		$this->emitter->fireEvent($event, $eventArgs);
@@ -69,11 +69,13 @@ class EventDispatcher
 			$this->_log($content);
 		}
 		ob_end_clean();
-		$this->_log('Done emitting: '.$event);
+		//$this->_log('Done emitting: '.$event);
 
 	}
+	
+
 	public function emitSync($event, $eventArgs){
-		$this->_log('Begin emitting syncrounously: '.$event.'('.json_encode($eventArgs).')');
+		//$this->_log('Begin emitting syncrounously: '.$event.'('.json_encode($eventArgs).')');
 		ob_start();
 		
 		$this->emitter->fireEventSync($event, $eventArgs);
@@ -83,13 +85,13 @@ class EventDispatcher
 			$this->_log($content);
 		}
 		ob_end_clean();
-		$this->_log('Done emitting: '.$event);
+		//$this->_log('Done emitting: '.$event);
 	}
 
 
 	/**
-	 * Throttle event allows an event to be scheduled (or emitted immediatly) while 
-	 * discarding simultanous events with the same name
+	 * Throttle event allows an event to be scheduled (or emitted immediately) while 
+	 * discarding simultaneous events with the same name
 	 *
 	 * a throttled event is discarded if the last event occurred within {throttleOptions->interval} seconds
 	 * instead of discarding the event. it will instead be rescheduled if {throttleOptions->reschedule} is true
@@ -117,7 +119,7 @@ class EventDispatcher
 
 
 
-		$this->_log('Begin throttled event: '.$event.'('.json_encode($eventArgs).') ('.json_encode($throttleOptions).')');
+		//$this->_log('Begin throttled event: '.$event.'('.json_encode($eventArgs).') ('.json_encode($throttleOptions).')');
 		ob_start();
 
 		$this->emitter->throttleEvent($event, $eventArgs, $throttleOptions, $secondsFromNow);
@@ -127,7 +129,7 @@ class EventDispatcher
 			$this->_log($content);
 		}
 		ob_end_clean();
-		$this->_log('Done throttled event: '.$event);
+		//$this->_log('Done throttled event: '.$event);
 
 	}
 
@@ -137,7 +139,7 @@ class EventDispatcher
 	public function scheduleInterval($event, $eventArgs, $intervalSeconds=0){
 		
 
-		$this->_log('Begin interval event: '.$event.'('.json_encode($eventArgs).')');
+		//$this->_log('Begin interval event: '.$event.'('.json_encode($eventArgs).')');
 		ob_start();
 
 		$this->emitter->scheduleEventInterval($event, $eventArgs, $intervalSeconds);
@@ -147,13 +149,22 @@ class EventDispatcher
 			$this->_log($content);
 		}
 		ob_end_clean();
-		$this->_log('Done interval event: '.$event);
+		//$this->_log('Done interval event: '.$event);
 
 	}
 
+	public function clearInterval($event){
+		$this->schedule('_clear_'.$event, array(), 0);
+	}
+
+	public function clearAllIntervals(){
+		$this->schedule('_clear_all_intervals_', array(), 0);
+	}
+
+
 	public function schedule($event, $eventArgs, $secondsFromNow){
 		
-		$this->_log('Begin scheduling: '.$event.'('.json_encode($eventArgs).')');
+		//$this->_log('Begin scheduling: '.$event.'('.json_encode($eventArgs).')');
 		ob_start();
 		
 		$this->emitter->scheduleEvent($event, $eventArgs, $secondsFromNow);
@@ -163,7 +174,7 @@ class EventDispatcher
 			$this->_log($content);
 		}
 		ob_end_clean();
-		$this->_log('Done emitting: '.$event);
+		//$this->_log('Done emitting: '.$event);
 
 	}
 
@@ -176,7 +187,16 @@ class EventDispatcher
 	}
 
 
-	public function shouldHandleEvent(){
+	public function shouldHandleEvent($callback=null){
+
+		if($callback instanceof \Closure){
+			$hasEvent=$this->emitter->hasEvent();
+			if($hasEvent){
+				$this->handleEvent($callback);
+			}
+			return $hasEvent;
+		}
+
 		return $this->emitter->hasEvent();
 	}
 
@@ -245,11 +265,11 @@ class EventDispatcher
 		$listeners=$this->handler->getEventListeners($event);
 		$content=trim(ob_get_contents());
 		if(!empty($content)){
-			$this->_log($content);
+			$this->_log($content."\n");
 		}
 		ob_end_clean();
 
-		$this->_log('Listeners: '.count($listeners));
+		//$this->_log('Listeners: '.count($listeners));
 
 
 
@@ -257,8 +277,8 @@ class EventDispatcher
 
 		$this->_handleEvent($listeners, $event, $eventArgs);
 
-		$this->_log('Finished handling event: '.$event);
-
+		//$this->_log('Finished handling event: '.$event."\n");
+		//$this->_log("\n");
 	}  
 
 

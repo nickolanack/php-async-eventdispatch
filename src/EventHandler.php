@@ -12,6 +12,11 @@ class EventHandler extends Handler
 
 	public function __construct($config){
 
+
+		if($config instanceof \Closure){
+			$config=array('handleEvent'=>$config);
+		}
+
 		if(is_object($config)){
 			$config=get_object_vars($config);
 		}
@@ -33,10 +38,10 @@ class EventHandler extends Handler
 			 * to support very simple schedule applications
 			 *
 			 * if no getEventListeners method is defined. a default listener ($this) is resolved 
-			 * so that the handleEvent method recieves a single execution with a null $listener argument
+			 * so that the handleEvent method receives a single execution with a null $listener argument
 			 */
 
-			error_log('EventHandler expects getEventListeners parameter');
+			//error_log('EventHandler expects getEventListeners parameter');
 			//throw new \Exception('EventHandler requires getEventListeners parameter');
 		}else{
 			$this->getListeners=$config['getEventListeners'];
@@ -52,10 +57,10 @@ class EventHandler extends Handler
 		
 		$environment=$this->environment;
 		if($environment){
-			echo 'Apply environment variables from cli: '.json_encode($env)."\n";
+			//echo 'Apply environment variables from cli: '.json_encode($env)."\n";
 			$environment($env);
 		}else{
-			echo 'Implementor did not apply environment variables from cli: '.json_encode($env)."\n";
+			//echo 'Implementor did not apply environment variables from cli: '.json_encode($env)."\n";
 		}
 	}
 		

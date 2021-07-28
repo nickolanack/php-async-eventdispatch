@@ -37,7 +37,7 @@ class FileScheduler extends Scheduler {
 
 	public function startProcessingLoop(){
 
-		echo getmypid() . ' FileScheduler: Schedule path: '.$this->dir.', '.count($this->getSchedules()).' Items'. "\n";
+		//echo getmypid() . ' FileScheduler: Schedule path: '.$this->dir.', '.count($this->getSchedules()).' Items'. "\n";
 
 		parent::startProcessingLoop();
 	}
@@ -62,7 +62,85 @@ class FileScheduler extends Scheduler {
 	protected function markThrottledExecution($eventName){
 		$throttle = $this->dir . '/.throttle.' .$eventName.'.last';
 		touch($throttle);
+		clearstatcache();
 	}
+	protected function getLastIntervalExecution($eventName){
+		$schedule = $this->dir . '/.interval.' .$eventName.'.schedule';
+		if(!file_exists($schedule)){
+			return -1;
+		}
+		return filemtime($schedule);
+	}
+
+	protected function declareInterval($eventName, $token){
+		$schedule = $this->dir . '/.interval.' .$eventName.'.schedule';
+		if(!file_exists($schedule)){
+			$this->markIntervalExecution($eventName, $token);
+		}
+	}
+
+	protected function markIntervalExecution($eventName, $token){
+		$schedule = $this->dir . '/.interval.' .$eventName.'.schedule';
+		file_put_contents($schedule, $token);
+	}
+
+	protected function intervalIsAlreadyRunning($eventName, $token){
+		$interval = $this->dir . '/.interval.' .$eventName.'.schedule';
+		if(!file_exists($interval)){
+			return false;
+		}
+		$activeToken=file_get_contents($interval);
+		if($activeToken===$token){
+			return false;
+		}
+		$scheduleFile=$this->getScheduleFile($activeToken);
+		$activeFile=str_replace('.schedule', '.queue', $scheduleFile);
+
+		return file_exists($scheduleFile)||file_exists($activeFile)||file_exists($activeFile.'.lock');
+
+	}
+
+	protected function clearAllIntervals(){
+
+		$intervals= array_values(
+			array_filter(scandir($this->dir), function($file){
+				if(strpos($file, '.interval.')===0){
+					return true;
+				}
+				return false;
+			})
+		);
+
+		foreach($intervals as $interval){
+			$this->clearInterval(str_replace('.interval.','',str_replace('.schedule','',$interval)));
+		}
+
+	}
+
+	protected function clearInterval($eventName){
+		
+		$interval = $this->dir . '/.interval.' .$eventName.'.schedule';
+		if(!file_exists($interval)){
+			echo getmypid() . ' FileScheduler: Interval not found: '.$eventName."\n";
+			return;
+		}
+		
+		$activeToken=file_get_contents($interval);
+		$scheduleFile=$this->getScheduleFile($activeToken);
+		$activeFile=str_replace('.schedule', '.queue', $scheduleFile);
+		
+		if(file_exists($scheduleFile)){
+			unlink($scheduleFile);
+		}
+		if(file_exists($activeFile)){
+			unlink($activeFile);
+		}
+		if(file_exists($interval)){
+			unlink($interval);
+		}
+
+	}
+
 
 	
 	protected function getScheduleFile($token){
@@ -70,14 +148,32 @@ class FileScheduler extends Scheduler {
 	}
 
 
+
+	protected function lockInterval($eventName, $callback) {
+		$interval = $this->dir . '/.interval.' .$eventName.'.schedule';
+		return $this->lockFileBlock($interval, $callback);
+	}
+
+	protected function lockThrottle($eventName ,$callback) {
+		$throttle = $this->dir . '/.throttle.' .$eventName.'.last';
+		return $this->lockFileBlock($throttle, $callback);
+	}
+
+
 	public function queue($scheduleName) {
 
 		$file = $this->dir.'/'.$scheduleName;
-
-		$queue = dirname($file) . '/.queue' . microtime() . '-' . substr(md5(time() . rand(1000, 9999)), 0, 10) . '.json';
-		if(file_exists($file)){
-			rename($file, $queue);
+		if(!file_exists($file)){
+			return $this;
 		}
+
+		$this->lockFile($file, function()use($file, $scheduleName){
+
+			$queue=dirname($file) . '/'.str_replace('.schedule', '.queue', $scheduleName);
+			//$queue = dirname($file) . '/.queue' . microtime() . '-' . substr(md5(time() . rand(1000, 9999)), 0, 10) . '.json';
+			rename($file, $queue);
+		});
+
 		return $this;
 
 	}
@@ -106,27 +202,76 @@ class FileScheduler extends Scheduler {
 		
 
 	}
-	protected function lockEvent($scheduleName){
+	protected function lockEvent($scheduleName, $scheduleData, $callback){
+
+
+
 		$file = $this->dir.'/'.$scheduleName;
 		if(file_exists($file.'.lock')){
-			return false;
+			return;
 		}
 		if(!file_put_contents($file.'.lock', getmypid())){
-			return false;
+			return;
 		}
 
-		$this->fp=fopen($file.'.lock', 'r+');
+		$this->fp=@fopen($file.'.lock', 'r+');
+
+		if(!$this->fp){
+			return;
+		}
+
 	
-		if ($this->fp!==false&&flock($this->fp, LOCK_EX | LOCK_NB)) {
-	        return true;
+		if (flock($this->fp, LOCK_EX | LOCK_NB)) {
+	        $callback();
 	    } 
 
-	    if($this->fp!==false){
-        	fclose($this->fp);
-   	 	}
-        $this->fp=null;
-        return false;
-	    
+	    fclose($this->fp);
+        if(file_exists($file.'.lock')){
+        	@unlink($file.'.lock');
+        }
+	  
+	}
+
+	private function lockFileBlock($file, $callback){
+
+		if(!file_exists($file)){
+			throw new \Exception('File does not exist: '.$file);
+		}
+
+		$file_handle = @fopen($file, 'r+');
+
+		if(!$file_handle){
+			throw new \Exception('fopen empty file handle: '.$file);
+		}
+
+		if(!flock($file_handle, LOCK_EX)){
+			fclose($file_handle); //close and unlock the file
+			throw new \Exception('Failed to lock file: '.$file);
+		}
+		$result=$callback();
+		fclose($file_handle); //close and unlock the file
+		return $result;
+	}
+
+
+	private function lockFile($file, $callback){
+
+		if(!file_exists($file)){
+			return;
+		}
+
+		$file_handle = @fopen($file, 'r+');
+
+		if(!$file_handle){
+			return;
+		}
+
+		if(!flock($file_handle, LOCK_EX | LOCK_NB)){
+			fclose($file_handle); //close and unlock the file
+			return;
+		}
+		$callback();
+		fclose($file_handle); //close and unlock the file
 
 	}
 
@@ -136,7 +281,7 @@ class FileScheduler extends Scheduler {
 		if(!file_exists($file)){
 			return null;
 		}
-		$content=file_get_contents($file);
+		$content=@file_get_contents($file);
 		$schedule = json_decode($content);
 
 		if(is_null($schedule)&&!empty($content)){
@@ -156,34 +301,37 @@ class FileScheduler extends Scheduler {
 			file_put_contents($file, json_encode($schedule, JSON_PRETTY_PRINT));
 		}
 		touch($file);
+		clearstatcache();
 
 	}
 
 	protected function registerScheduler() {
 
 		touch($this->dir . '/.pid-' . getmypid());
-		echo getmypid().": Register Scheduler: ".$this->dir.": ".getmypid();
+		clearstatcache();
+		//echo getmypid().": Register Scheduler: ".$this->dir.'/.pid-' . getmypid()."\n";
 
 	}
 
 	protected function unregisterScheduler() {
 
 		unlink($this->dir . '/.pid-' . getmypid());
-		echo getmypid().": Unregister Scheduler: ".$this->dir.": ".getmypid();
+		//echo getmypid().": Unregister Scheduler: ".$this->dir.": ".getmypid();
 
 	}
 
 	protected function remove($scheduleName) {
 		$file = $this->dir.'/'.$scheduleName;
 
+		if(!file_exists($file)){
+			return;
+		}
+
 		unlink($file);
 
-		if($this->fp){
-			flock($this->fp, LOCK_UN);
-			fclose($this->fp);
-			$this->fp=null;
+		if(file_exists($file.'.lock')){
+			@unlink($file.'.lock');
 		}
-		unlink($file.'.lock');
 	}
 
 
@@ -208,7 +356,7 @@ class FileScheduler extends Scheduler {
 		}
 
 		if(!file_exists('/proc/'.$pid)){
-			$this->checkAllPids();
+			$this->checkAllPids($pids);
 		}
 	}
 

@@ -13,14 +13,14 @@ $dispatcher=new asyncevent\AsyncEventDispatcher(array(
 			'thetime'=>time()
 		);
 	},
-	'log'=>dirname(__DIR__).'/.schedule.log',
+	'log'=>__DIR__.'/.schedule.log',
 	'handler'=>asyncevent\FileScheduler::class,
-	'schedule'=>__DIR__
+	'schedule'=>__DIR__.'/schedules'
 ));
 
 if($dispatcher->shouldHandleEvent()){
 
-	echo getmypid().' Should Handle'."\n";
+	//echo getmypid().' Should Handle'."\n";
 	$dispatcher->handleEvent(
 		array(
 			'setEnvironment' => function($env){
@@ -53,6 +53,6 @@ echo 'Expected Event: '.date('H:i:s', time()+50);
 for($i=0;$i<100;$i++){
 	$dispatcher->schedule('testEvent', array(
 		'hello'=>'world',
-	), rand(100, 150));
+	), 30);
 }
 

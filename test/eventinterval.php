@@ -31,7 +31,7 @@ if($dispatcher->shouldHandleEvent()){
 				return array(
 					function($event, $eventArgs)use(&$dispatcher){
 
-						echo 'Event handler message: '.date('H:i:s');
+						echo 'Event '.date('H:i:s');
 					
 					}
 				);
@@ -45,13 +45,23 @@ if($dispatcher->shouldHandleEvent()){
 	return; 
 }
 
-echo getmypid().' Schedule Throttle Test'."\n";
-echo getmypid().' Event name: testEvent'."\n";
+echo getmypid().' Schedule Runner Test'."\n";
 
 
-for($i=0;$i<500;$i++){
-	$dispatcher->throttle('testEvent', array(
+for($i=0;$i<600;$i++){
+	$dispatcher->scheduleInterval('testEvent', array(
 		'hello'=>'world',
-	), array('interval'=>5), rand(0, 20));
+	), 5);
+	usleep(50000);
+}
+$dispatcher->clearInterval('testEvent');
+
+for($i=0;$i<60;$i++){
+	$dispatcher->scheduleInterval('testEvent', array(
+		'hello'=>'world',
+	), 10);
+	usleep(500000);
 }
 
+
+$dispatcher->clearAllIntervals();

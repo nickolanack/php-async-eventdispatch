@@ -6,6 +6,10 @@ class AsyncEventDispatcher extends EventDispatcher
 
 	public function __construct($config){
 
+		if(!isset($config['command'])){
+			$config['command']='php '.debug_backtrace()[0]['file'];
+		}
+		
 		parent::__construct(array_merge($config, array('eventEmitter'=>new AsyncEventEmitter($config))));
 
 	}
