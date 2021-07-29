@@ -189,11 +189,7 @@ class AsyncEventEmitter implements EventEmitter
 			), $token);
 
 
-		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
-		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
-		system($keepalive.$this->_out().' &');
-		
-		$this->counter++;
+		$this->_trigger($schedule);
 		
 
 	}
@@ -222,12 +218,18 @@ class AsyncEventEmitter implements EventEmitter
 			), $token);
 
 
+		$this->_trigger($schedule);
+		
+
+	}
+
+	private function _trigger($schedule){
+
 		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
 		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
-		system($keepalive.$this->_out().' &');
+		system($cmd.$this->_out().' &');
 		
 		$this->counter++;
-		
 
 	}
 
@@ -255,11 +257,7 @@ class AsyncEventEmitter implements EventEmitter
 			), $token);
 
 
-		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
-		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
-		system($keepalive.$this->_out().' &');
-		
-		$this->counter++;
+		$this->_trigger($schedule);
 
 
 	}

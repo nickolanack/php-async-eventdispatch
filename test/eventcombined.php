@@ -10,11 +10,9 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 
 if ($dispatcher->shouldHandleEvent(
 	function ($listener, $event, $eventArgs) {
+		
 		echo 'Event ' . date('H:i:s') . json_encode($eventArgs);
-
-		if ($event == 'testEvent') {
-
-		}
+	
 	})) {
 
 	return;
