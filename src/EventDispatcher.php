@@ -240,7 +240,7 @@ class EventDispatcher
 		}
 		ob_end_clean();
 
-		$this->_log('Handling Event: '.$event);
+		$this->_log('Event: '.$event);
 
 
 		ob_start();

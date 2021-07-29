@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * WARNING this test schedules >30000 events within a few seconds
+ */
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $dispatcher = new asyncevent\AsyncEventDispatcher(array(
@@ -9,10 +13,21 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 ));
 
 if ($dispatcher->shouldHandleEvent(
-	function ($listener, $event, $eventArgs) {
+	function ($listener, $event, $eventArgs) use($dispatcher){
 		
 		echo 'Event ' . date('H:i:s') . json_encode($eventArgs);
 	
+		if($event=='testEvent1'){
+			for ($i = 0; $i < 10; $i++) {
+				$dispatcher->schedule('testEvent3', array(
+					'hello' => 'world - ' . $i,
+				), rand(5, 20));
+				usleep(5000);
+			}
+		}
+
+
+
 	})) {
 
 	return;
@@ -32,19 +47,19 @@ $dispatcher->scheduleInterval('testInterval3', array(
 	'interval' => 3,
 ), 25);
 
-for ($i = 0; $i < 300; $i++) {
-	$dispatcher->schedule('testEvent', array(
+for ($i = 0; $i < 3000; $i++) {
+	$dispatcher->schedule('testEvent1', array(
 		'hello' => 'world - ' . $i,
 	), rand(10, 100));
-	usleep(50000);
+	usleep(5000);
 }
 
-for ($i = 0; $i < 500; $i++) {
-	$dispatcher->throttle('testEvent', array(
+for ($i = 0; $i < 1000; $i++) {
+	$dispatcher->throttle('testEvent2', array(
 		'hello' => 'world - ' . $i,
 	), array('interval' => 5), rand(0, 20));
 
-	usleep(50000);
+	usleep(5000);
 }
 
 sleep(30);

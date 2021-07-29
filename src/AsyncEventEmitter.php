@@ -25,6 +25,8 @@ class AsyncEventEmitter implements EventEmitter
 
 	protected $handlerArg;
 	protected $handler=FileScheduler::class;
+
+	private $_last=-1;
 	
 	public function __construct($config){
 	
@@ -225,11 +227,22 @@ class AsyncEventEmitter implements EventEmitter
 
 	private function _trigger($schedule){
 
+		if($this->getDepth()>0){
+			//schedule must be running already, this could get out of control
+			return;
+		}
+
+		if(microtime(true)-$this->_last<min(5, 0.1*$this->counter*$this->counter*$this->counter)){
+			return;
+		}
+
+
 		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
 		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
 		system($cmd.$this->_out().' &');
 		
 		$this->counter++;
+		$this->_last=microtime(true);
 
 	}
 

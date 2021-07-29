@@ -156,6 +156,9 @@ class FileScheduler extends Scheduler {
 
 	protected function lockThrottle($eventName ,$callback) {
 		$throttle = $this->dir . '/.throttle.' .$eventName.'.last';
+		if(!file_exists($throttle)){
+			touch($throttle);
+		}
 		return $this->lockFileBlock($throttle, $callback);
 	}
 
