@@ -232,7 +232,16 @@ class AsyncEventEmitter implements EventEmitter
 			return;
 		}
 
-		if(microtime(true)-$this->_last<min(5, 0.1*$this->counter*$this->counter*$this->counter)){
+		$x=min(5, 0.1*$this->counter*$this->counter*$this->counter);
+		if(microtime(true)-$this->_last<$x){
+			// for counter values = [0,1,2,3,4,5,6],  $x = [0, 0.1, 0.8, 2.7, 5, 5, 5]
+			// if the last event occurred more than than $x seconds ago the emitter will run schedule.php in a separate process
+			// schedule.php will create an instance of Scheduler, will queue the task (if it has not already been queued by another 
+			// thread) and begin processing available tasks if < {$maxProcesses} schedulers are already running
+			// 
+			// for testing purposes, calling schedule.php thousands of times can quickly exceed the maximum processes (bash: ulimit -u)
+			// but it is not necessary to schedule.php more than a few times until the max threads have been started
+
 			return;
 		}
 
