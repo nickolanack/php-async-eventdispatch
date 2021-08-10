@@ -399,7 +399,9 @@ class FileScheduler extends Scheduler {
 			})
 		);
 
-		$this->checkPid($pids);
+		if(!empty($pids)){
+			$this->checkPid($pids);
+		}
 
 		return $pids;
 
