@@ -146,13 +146,13 @@ abstract class Scheduler {
 		$this->_sleep($scheduleName, $scheduleData);
 
 		
-		if (key_exists('throttle', $scheduleData->schedule)) {
+		if (isset($scheduleData->schedule->throttle)) {
 			if(!$this->_throttleOk($scheduleName, $scheduleData)){
 				return;
 			}
 		}
 
-		if (key_exists('interval', $scheduleData->schedule)) {
+		if (isset($scheduleData->schedule->interval)) {
 			if(!$this->_intervalOk($scheduleName, $scheduleData)){
 				return;
 			}
@@ -179,7 +179,7 @@ abstract class Scheduler {
 		/**
 		 * Note: Not the same as throttle->interval;
 		 */
-		if (key_exists('interval', $scheduleData->schedule)) {
+		if (isset($scheduleData->schedule->interval)) {
 
 			/**
 			 * edge case. events could start to stack up if the event processing time is longer than the interval
