@@ -1,5 +1,9 @@
 <?php
 
+if (realpath($argv[0]) !== __FILE__) {
+	exit();
+}
+
 /**
  * WARNING this test schedules >30000 events within a few seconds
  */
@@ -13,11 +17,11 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 ));
 
 if ($dispatcher->shouldHandleEvent(
-	function ($listener, $event, $eventArgs) use($dispatcher){
-		
+	function ($listener, $event, $eventArgs) use ($dispatcher) {
+
 		echo 'Event ' . date('H:i:s') . json_encode($eventArgs);
-	
-		if($event=='testEvent1'){
+
+		if ($event == 'testEvent1') {
 			for ($i = 0; $i < 10; $i++) {
 				$dispatcher->schedule('testEvent3', array(
 					'hello' => 'world - ' . $i,
@@ -25,8 +29,6 @@ if ($dispatcher->shouldHandleEvent(
 				usleep(5000);
 			}
 		}
-
-
 
 	})) {
 

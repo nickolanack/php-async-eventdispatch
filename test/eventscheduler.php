@@ -1,58 +1,58 @@
 <?php
 
+if (realpath($argv[0]) !== __FILE__) {
+	exit();
+}
 
-require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-
-
-$dispatcher=new asyncevent\AsyncEventDispatcher(array(
-	'command'=>'php '.__FILE__, 
-	'getEnvironment'=>function(){
+$dispatcher = new asyncevent\AsyncEventDispatcher(array(
+	'command' => 'php ' . __FILE__,
+	'getEnvironment' => function () {
 		//get environment variables for passing to shell_exec on cli
 		return array(
-			'thetime'=>time()
+			'thetime' => time(),
 		);
 	},
-	'log'=>__DIR__.'/.schedule.log',
-	'handler'=>asyncevent\FileScheduler::class,
-	'schedule'=>__DIR__.'/schedules'
+	'log' => __DIR__ . '/.schedule.log',
+	'handler' => asyncevent\FileScheduler::class,
+	'schedule' => __DIR__ . '/schedules',
 ));
 
-if($dispatcher->shouldHandleEvent()){
+if ($dispatcher->shouldHandleEvent()) {
 
 	//echo getmypid().' Should Handle'."\n";
 	$dispatcher->handleEvent(
 		array(
-			'setEnvironment' => function($env){
-				
+			'setEnvironment' => function ($env) {
+
 			},
-			'getEventListeners'=>function($event)use(&$dispatcher){
+			'getEventListeners' => function ($event) use (&$dispatcher) {
 
 				return array(
-					function($event, $eventArgs)use(&$dispatcher){
+					function ($event, $eventArgs) use (&$dispatcher) {
 
-						echo 'Event '.date('H:i:s');
-					
-					}
+						echo 'Event ' . date('H:i:s');
+
+					},
 				);
 
 			},
-			'handleEvent'=>function($listener, $event, $eventArgs){
+			'handleEvent' => function ($listener, $event, $eventArgs) {
 				$listener($event, $eventArgs);
-			}
+			},
 		)
 	);
-	return; 
+	return;
 }
 
-echo getmypid().' Schedule Runner Test'."\n";
-echo getmypid().' Schedule testEvent'."\n";
+echo getmypid() . ' Schedule Runner Test' . "\n";
+echo getmypid() . ' Schedule testEvent' . "\n";
 
-echo 'Expected Event: '.date('H:i:s', time()+50);
+echo 'Expected Event: ' . date('H:i:s', time() + 50);
 
-for($i=0;$i<100;$i++){
+for ($i = 0; $i < 100; $i++) {
 	$dispatcher->schedule('testEvent', array(
-		'hello'=>'world',
+		'hello' => 'world',
 	), 30);
 }
-
