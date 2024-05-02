@@ -112,7 +112,7 @@ class AsyncEventEmitter implements EventEmitter
 
 
 	protected function isCli(){
-		return key_exists('TERM', $_SERVER)&&php_sapi_name() === 'cli';
+		return php_sapi_name() === 'cli';
 	}
 	protected function eventArgs(){
 		if ($this->isCli()) {
