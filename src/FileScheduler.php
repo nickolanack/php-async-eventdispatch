@@ -42,6 +42,22 @@ class FileScheduler extends Scheduler {
 		parent::startProcessingLoop();
 	}
 
+	public function encodeEventArgs($eventArgs){
+		$file=tempnam($this->dir, '_args');
+		file_put_contents($file, json_encode($eventArgs));
+		return $file;
+	}
+
+	public function decodeEventArgs($eventArgs){
+		if(is_string($eventArgs)&&file_exists($eventArgs)){
+			$file=$eventArgs;
+			$eventArgs=json_decode(file_get_contents($file));
+			unlink($file);
+		}
+		return $eventArgs;
+	}
+
+
 	public function createSchedule($scheduleData, $token){
 
 		while(file_exists($file=$this->getScheduleFile($token))){}

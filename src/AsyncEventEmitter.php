@@ -17,7 +17,7 @@ class AsyncEventEmitter implements EventEmitter
 	
 	protected $id;
 	protected $counter=0;
-
+	protected $depth=0;
 
 	protected $environment;
 
@@ -77,7 +77,11 @@ class AsyncEventEmitter implements EventEmitter
 				//echo json_encode($args)."\n";
 
 				$this->event = $args->name;
-				$this->eventArgs = $args->arguments;
+
+				$handlerClass=$this->handler;
+				$handler=new $handlerClass($this->handlerArg);
+				$eventArgsDecoded=$handler->decodeEventArgs($args->arguments);
+				$this->eventArgs = $eventArgsDecoded;
 
 			
 				
@@ -304,9 +308,13 @@ class AsyncEventEmitter implements EventEmitter
 			$environment=array();
 		}
 
+		$handlerClass=$this->handler;
+		$handler=new $handlerClass($this->handlerArg);
+		$eventArgsEscaped=$handler->encodeEventArgs($eventArgs);
+
 		$argString=' --event ' . escapeshellarg(json_encode(array(
 			'name'=>$event,
-			'arguments'=>$eventArgs,
+			'arguments'=>$eventArgsEscaped,
 			'trace'=>$this->trace. '->' . $event,
 			'depth'=>$this->depth + 1,
 			'environment'=>$environment
