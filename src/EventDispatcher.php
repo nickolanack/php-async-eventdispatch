@@ -326,8 +326,8 @@ class EventDispatcher
 			foreach($children as $index=>$child){
 				//only the parent should get here becuase $children would be empty otherwise
 				$this->_log('Wait for child #'.($index+1));
-				pcntl_waitpid($child);
-				$this->_log('Signaled exit from #'.($index+1));
+				pcntl_waitpid($child, $status);
+				$this->_log('Signaled exit from #'.($index+1).' '.(pcntl_wifexited($status)?pcntl_wexitstatus($status):'Did not exit normally'));
 			}
 			$this->_log('Fork parent finished: '.getmypid().' -> '.json_encode($children));
 		}

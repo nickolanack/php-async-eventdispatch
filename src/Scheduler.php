@@ -24,12 +24,18 @@ abstract class Scheduler {
 
 	public function run($scheduleName) {
 
-		$scheduleData = $this->_getData($scheduleName);
+		$scheduleData=null;
+		try{
+			$scheduleData = $this->_getData($scheduleName);
+		}catch(\Exception $e){
+			echo 'ERROR: '.$scheduleName.' '.$e->getMessage();
+			return;
+		}
 		if (is_null($scheduleData)) {
 			return;
 		}
 
-		$this->lockEvent($scheduleName, $scheduleData, function () use ($scheduleName, $scheduleData) {
+		$this->lockEvent($scheduleName, function () use ($scheduleName, $scheduleData) {
 
 
 			if(!isset($scheduleData->schedule)){
@@ -100,7 +106,7 @@ abstract class Scheduler {
 
 
 			if ($this->intervalIsAlreadyRunning($scheduleData->schedule->name, $scheduleData->schedule->token)) {
-				$this->remove($scheduleName);
+				$this->removeSchedule($scheduleName);
 				return false;
 			}
 
@@ -173,7 +179,7 @@ abstract class Scheduler {
 
 		$this->lastExecutedTime = time();
 		//echo getmypid() . ': Remove Schedule' . "\n";
-		$this->remove($scheduleName);
+		$this->removeSchedule($scheduleName);
 		//echo getmypid() . ': Cleanup' . "\n";
 
 		/**
@@ -215,13 +221,13 @@ abstract class Scheduler {
 	 */
 	abstract public function createSchedule($scheduleData, $token);
 
-	abstract protected function remove($scheduleName);
+	abstract protected function removeSchedule($scheduleName);
 	abstract public function queue($scheduleName);
 	abstract protected function getScheduleData($scheduleName);
 	abstract protected function updateProcess($scheduleName, $scheduleData);
 
 	abstract protected function getSchedules();
-	abstract protected function lockEvent($scheduleName, $scheduleData, $callback);
+	abstract protected function lockEvent($scheduleName, $callback);
 
 	abstract protected function registerScheduler();
 	abstract protected function unregisterScheduler();
@@ -264,18 +270,23 @@ abstract class Scheduler {
 		}
 
 		//echo getmypid() . ': Discard Throttled Schedule: ' .$scheduleName. "\n";
-		$this->remove($scheduleName);
+		$this->removeSchedule($scheduleName);
 
 	}
 
 	public function shouldRunNow($scheduleName) {
 
-		$schedule = $this->_getData($scheduleName);
-		if (is_null($schedule)) {
+		$scheduleData = null;
+		try{
+			$scheduleData = $this->_getData($scheduleName);
+		}catch(\Exception $e){
+			echo 'ERROR: '.$scheduleName.' '.$e->getMessage();
+		}
+		if (is_null($scheduleData)) {
 			return false;
 		}
 
-		$time = $schedule->schedule->time;
+		$time = $scheduleData->schedule->time;
 
 		$secondsFromNow = max($time - time(), 0);
 		return ($secondsFromNow < 2);
@@ -316,16 +327,16 @@ abstract class Scheduler {
 
 						if (isset($data->schedule->interval) && $this->intervalIsAlreadyRunning($data->schedule->name, $data->schedule->token)) {
 							
-							$this->lockEvent($scheduleName, $data, function()use($scheduleName){
+							$this->lockEvent($scheduleName, function()use($scheduleName){
 								//echo getmypid() . ': Discard Interval'."\n";
-								$this->remove($scheduleName);
+								$this->removeSchedule($scheduleName);
 							});
 							continue;
 						}
 
 						if (isset($data->schedule->throttle) && $this->shouldThrottle($scheduleName, $data)) {
 							
-							$this->lockEvent($scheduleName, $data, function()use($scheduleName){
+							$this->lockEvent($scheduleName, function()use($scheduleName){
 								$this->throttle($scheduleName);	
 							});
 							

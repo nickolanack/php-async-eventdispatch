@@ -18,8 +18,8 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 		);
 	},
 	'log' => __DIR__ . '/.closure.log',
-	'schedule' => __DIR__,
-	'handler' => asyncevent\FileScheduler::class,
+	'schedule' => '11211',
+	'handler' => \asyncevent\schedulers\MemcachedScheduler::class,
 ));
 
 /*
@@ -27,7 +27,7 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
  */
 if ($dispatcher->shouldHandleEvent()) {
 
-	echo getmypid() . ' Should Handle' . "\n";
+	// echo getmypid() . ' Should Handle' . "\n";
 	$dispatcher->handleEvent(
 		array(
 			'setEnvironment' => function ($env) {
@@ -48,7 +48,7 @@ if ($dispatcher->shouldHandleEvent()) {
 							echo getmypid() . ' Emit recursive testEvent at depth: ' . $dispatcher->getDepth() . "\n";
 							$dispatcher->schedule('testEvent', array(
 								'hello' => 'world',
-							), 10);
+							), 0);
 						}
 
 					},
@@ -73,7 +73,7 @@ if ($dispatcher->shouldHandleEvent()) {
 
 echo getmypid() . ' Event Runner Test' . "\n";
 echo getmypid() . ' Emit testEvent' . "\n";
-for ($i = 0; $i < 100; $i++) {
+for ($i = 0; $i < 10000; $i++) {
 	$dispatcher->emit('testEvent', array(
 		'hello' => 'world',
 	));

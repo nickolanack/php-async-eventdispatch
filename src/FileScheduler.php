@@ -35,13 +35,6 @@ class FileScheduler extends Scheduler {
 	}
 
 
-	public function startProcessingLoop(){
-
-		//echo getmypid() . ' FileScheduler: Schedule path: '.$this->dir.', '.count($this->getSchedules()).' Items'. "\n";
-
-		parent::startProcessingLoop();
-	}
-
 	public function encodeEventArgs($eventArgs){
 		$file=tempnam($this->dir, '_args');
 		file_put_contents($file, json_encode($eventArgs));
@@ -221,7 +214,7 @@ class FileScheduler extends Scheduler {
 		
 
 	}
-	protected function lockEvent($scheduleName, $scheduleData, $callback){
+	protected function lockEvent($scheduleName, $callback){
 
 
 
@@ -339,7 +332,7 @@ class FileScheduler extends Scheduler {
 
 	}
 
-	protected function remove($scheduleName) {
+	protected function removeSchedule($scheduleName) {
 		$file = $this->dir.'/'.$scheduleName;
 
 		if(!file_exists($file)){
