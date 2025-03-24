@@ -11,8 +11,18 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	public function __construct($options='11211') {
 
 		$port='11211';
+		$host='127.0.0.1';
+
 		if(is_string($options)){
 			$port=$options;
+			if(strpos($port, ':')>=0){
+
+				print_r($port);
+
+				$parts=explode(':', $port);
+				$port=array_pop($parts);
+				$host=implode(':', $parts);
+			}
 		}
 
 		if($options instanceof \Memcached){
@@ -21,7 +31,7 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 		}
 
 		$memcached = new \Memcached();
-		if($memcached->addServer('127.0.0.1', intval($port))===false){
+		if($memcached->addServer($host, intval($port))===false){
 			throw new \Exception('Failed to connect to memcached server: ' .$memcached->getResultMessage().' - '.$memcached->getResultCode());
 		}
 		$this->memcached=$memcached;
@@ -94,6 +104,12 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 
 		$record[2]=time();
 		$this->memcached->set($name, $record);
+	}
+
+	public function getHandlerArg(){
+
+		$server=$this->memcached->getServerList()[0];
+		return $server['host'].':'.$server['port'];
 	}
 
 	protected function _rename($oldName, $newName){

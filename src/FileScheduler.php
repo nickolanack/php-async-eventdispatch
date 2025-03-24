@@ -34,6 +34,10 @@ class FileScheduler extends Scheduler {
 
 	}
 
+	public function getHandlerArg(){
+		return realpath($this->dir);
+	}
+
 
 	public function encodeEventArgs($eventArgs){
 		$file=tempnam($this->dir, '_args');

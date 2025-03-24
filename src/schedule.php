@@ -9,26 +9,28 @@ if(file_exists(__DIR__ . '/../vendor/autoload.php')){
 
 $longOpts = array(
 	'schedule:',
-	'handler:'
+	'handler:',
+	'handlerArg:'
 );
 $args = getopt('', $longOpts);
 
 $schedule = $args['schedule'];
 
 
-//echo ($schedule)."\n";
+echo ($schedule)."\n";
 
 if(array_key_exists('handler', $args)){
 
 
 
 	$class=$args['handler'];
+	$arg=$args['handlerArg'];
 
 
 
 	//error_log($class);
 
-	(new $class($schedule))
+	(new $class($arg))
 	//->run($file);
 	->queue($schedule)
 	->checkProcesses();

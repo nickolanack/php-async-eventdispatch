@@ -25,6 +25,7 @@ class AsyncEventEmitter implements EventEmitter
 
 	protected $handlerArg;
 	protected $handler=FileScheduler::class;
+	protected static $_handler=null;
 
 	private $_last=-1;
 	
@@ -78,8 +79,7 @@ class AsyncEventEmitter implements EventEmitter
 
 				$this->event = $args->name;
 
-				$handlerClass=$this->handler;
-				$handler=new $handlerClass($this->handlerArg);
+				$handler=$this->getHandler();
 				$eventArgsDecoded=$handler->decodeEventArgs($args->arguments);
 				$this->eventArgs = $eventArgsDecoded;
 
@@ -179,20 +179,21 @@ class AsyncEventEmitter implements EventEmitter
 
 		
 
-		$handlerClass=$this->handler;
-		$handler=new $handlerClass($this->handlerArg);
+		$handler=$this->getHandler();
 		$token=$this->getScheduleToken();
 
-		$schedule=$handler->createSchedule(array(
-				'schedule'=>array(
-					'name'=>$event,
-					'dispatched'=>$now,
-					'time'=>$time,
-					'token'=>$token
-				),
-				'cmd'=>$this->getShellEventCommand($event, $eventArgs).$this->_out().' &'
+		$scheduleData=array(
+			'schedule'=>array(
+				'name'=>$event,
+				'dispatched'=>$now,
+				'time'=>$time,
+				'token'=>$token
+			),
+			'cmd'=>$this->getShellEventCommand($event, $eventArgs).$this->_out().' &'
 
-			), $token);
+		);
+
+		$schedule=$handler->createSchedule($scheduleData, $token);
 
 
 		$this->_trigger($schedule);
@@ -207,8 +208,7 @@ class AsyncEventEmitter implements EventEmitter
 
 		
 
-		$handlerClass=$this->handler;
-		$handler=new $handlerClass($this->handlerArg);
+		$handler=$this->getHandler();
 		$token=$this->getScheduleToken();
 
 		$schedule=$handler->createSchedule(array(
@@ -250,13 +250,35 @@ class AsyncEventEmitter implements EventEmitter
 		}
 
 
-		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler);
+		$keepalive='php '.__DIR__.'/schedule.php'.' --schedule '.escapeshellarg($schedule).' --handler '.escapeshellarg($this->handler). ' --handlerArg '.escapeshellarg($this->getHandlerArg());
 		$cmd='nice -n 20 /bin/bash -e -c '.escapeshellarg($keepalive);
+
+
+		file_put_contents($this->logPath, $cmd."\n\n", FILE_APPEND);
+
 		system($cmd.$this->_out().' &');
 		
 		$this->counter++;
 		$this->_last=microtime(true);
 
+	}
+
+	protected function getHandlerArg(){
+		$handler=$this->getHandler();
+		return $handler->getHandlerArg();
+	}
+
+
+	protected function getHandler(){
+
+		if(is_null(self::$_handler)){
+
+			$handlerClass=$this->handler;
+			$handler=new $handlerClass($this->handlerArg);
+			self::$_handler=$handler;
+
+		}
+		return self::$_handler;
 	}
 
 	public function throttleEvent($event, $eventArgs, $throttleOptions, $secondsFromNow=0){
@@ -266,8 +288,7 @@ class AsyncEventEmitter implements EventEmitter
 
 		
 
-		$handlerClass=$this->handler;
-		$handler=new $handlerClass($this->handlerArg);
+		$handler=$this->getHandler();
 		$token=$this->getScheduleToken();
 
 		$schedule=$handler->createSchedule(array(
@@ -308,8 +329,7 @@ class AsyncEventEmitter implements EventEmitter
 			$environment=array();
 		}
 
-		$handlerClass=$this->handler;
-		$handler=new $handlerClass($this->handlerArg);
+		$handler=$this->getHandler();
 		$eventArgsEscaped=$handler->encodeEventArgs($eventArgs);
 
 		$argString=' --event ' . escapeshellarg(json_encode(array(
