@@ -112,7 +112,11 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected function _keylist(){
 	
 		$list = $this->memcached->getAllKeys();
-		//echo 'keylist: '.print_r($list, true)."\n";
+
+		if($list===false){
+			throw new \Exception('Failed to getAllKeys: '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode());
+		}
+
 		return $list;
 	}
 
