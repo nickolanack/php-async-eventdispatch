@@ -17,7 +17,6 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 			$port=$options;
 			if(strpos($port, ':')>=0){
 
-				print_r($port);
 
 				$parts=explode(':', $port);
 				$port=array_pop($parts);
