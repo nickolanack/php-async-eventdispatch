@@ -8,7 +8,12 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected $fp=null;
 	protected $memcached=null;
 
-	public function __construct($port='11211') {
+	public function __construct($options='11211') {
+
+		$port='11211';
+		if(is_string($options)){
+			$port=$options;
+		}
 
 		$memcached = new \Memcached();
 		if($memcached->addServer('127.0.0.1', intval($port))===false){
