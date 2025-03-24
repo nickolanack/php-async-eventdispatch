@@ -8,12 +8,19 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected $fp=null;
 	protected $memcached=null;
 
-	public function __construct($options='11211') {
+	protected $namespace='default';
+
+	public function __construct($options='11211', $namespace=null) {
 
 		$port='11211';
 		$host='127.0.0.1';
 
+		if(!empty($namespace)){
+			$this->namespace=$namespace;
+		}
+
 		if(is_string($options)){
+
 			$port=$options;
 			if(strpos($port, ':')>=0){
 
@@ -22,7 +29,23 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 				$port=array_pop($parts);
 				$host=implode(':', $parts);
 			}
+		
+			
+			if(strpos($port, '/')>0){
+
+				if(!empty($namespace)){
+					throw new \Exception('Can\'t define namespace twice');
+				}
+
+				$parts=explode('/', $port);
+				$port=array_shift($parts);
+				$namespace=implode('/', $parts);
+				$this->namespace=$namespace;
+			}
+			
 		}
+
+		
 
 		if($options instanceof \Memcached){
 			$this->memcached=$options;
@@ -51,7 +74,7 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected function _store($name, $data){
 		$name=$this->_name($name);
 		//echo 'store: '.$name."\n";
-		$res=$this->memcached->set($name, [$data, time(), time()]);
+		$res=$this->memcached->set($this->namespace.$name, [$data, time(), time()]);
 		if($res===false){
 			throw new \Exception('Failed to store: '.$name.' '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode());
 		}
@@ -60,11 +83,11 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected function _add($name, $data){
 		$name=$this->_name($name);
 		//echo 'add: '.$name."\n";
-		return $this->memcached->add($name, [$data, time(), time()]);
+		return $this->memcached->add($this->namespace.$name, [$data, time(), time()]);
 	}
 	protected function _fetch($name){
 		$name=$this->_name($name);
-		$data= $this->memcached->get($name);
+		$data= $this->memcached->get($this->namespace.$name);
 		if($data===false){
 			throw new \Exception('Failed to fetch: '.$name.' '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode());
 		}
@@ -76,25 +99,25 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	protected function _delete($name){
 		$name=$this->_name($name);
 		//echo 'delete: '.$name."\n";
-		$this->memcached->delete($name);
+		$this->memcached->delete($this->namespace.$name);
 	}
 
 	protected function _mtime($name){
 		$name=$this->_name($name);
 		//echo 'mtime: '.$name."\n";
-		return $this->memcached->get($name)[2];
+		return $this->memcached->get($this->namespace.$name)[2];
 	}
 
 	protected function _exists($name){
 		$name=$this->_name($name);
 		//echo 'exists: '.$name."\n";
-		return $this->memcached->get($name)!==false;
+		return $this->memcached->get($this->namespace.$name)!==false;
 	}
 
 	protected function _touch($name){
 		$name=$this->_name($name);
 		//echo 'touch: '.$name."\n";
-		$record = $this->memcached->get($name);
+		$record = $this->memcached->get($this->namespace.$name);
 
 		if($record===false){
 			//create if not exists
@@ -102,13 +125,13 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 		}
 
 		$record[2]=time();
-		$this->memcached->set($name, $record);
+		$this->memcached->set($this->namespace.$name, $record);
 	}
 
 	public function getHandlerArg(){
 
 		$server=$this->memcached->getServerList()[0];
-		return $server['host'].':'.$server['port'];
+		return $server['host'].':'.$server['port'].'/'.$this->namespace;
 	}
 
 	protected function _rename($oldName, $newName){
@@ -116,11 +139,11 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 		$newName=$this->_name($newName);
 
 		//echo 'rename: '.$oldName.' '.$newName."\n";
-		$record = $this->memcached->get($oldName);
-		$this->memcached->delete($oldName);
+		$record = $this->memcached->get($this->namespace.$oldName);
+		$this->memcached->delete($this->namespace.$oldName);
 
 		$record[2]=time();
-		$this->memcached->set($newName, $record);
+		$this->memcached->set($this->namespace.$newName, $record);
 	}
 
 
@@ -132,7 +155,11 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 			throw new \Exception('Failed to getAllKeys: '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode().' '.print_r($this->memcached->getServerList(), true));
 		}
 
-		return $list;
+		return array_map(function($key){
+			return str_replace($this->namespace, '', $key);
+		}, array_values(array_filter($list, function($key){
+			return strpos($key,$this->namespace)===0;
+		})));
 	}
 
 

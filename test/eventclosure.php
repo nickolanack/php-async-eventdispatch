@@ -18,7 +18,7 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 		);
 	},
 	'log' => __DIR__ . '/.closure.log',
-	'schedule' => '11211',
+	'schedule' => 'localhost:11211/awesome',
 	'handler' => \asyncevent\schedulers\MemcachedScheduler::class,
 ));
 
