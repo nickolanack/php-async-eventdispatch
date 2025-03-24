@@ -52,11 +52,11 @@ class AsyncEventEmitter implements EventEmitter
 			$this->logPath=$config['log'];
 		}
 
-		if(key_exists('schedule', $config)&&is_string($config['schedule'])){
+		if(key_exists('schedule', $config)/*&&is_string($config['schedule'])*/){
 			$this->handlerArg=$config['schedule'];
 		}
 			
-		if(key_exists('handler', $config)&&is_string($config['schedule'])){
+		if(key_exists('handler', $config)&&is_string($config['handler'])){
 			$this->handler=$config['handler'];
 		}
 
