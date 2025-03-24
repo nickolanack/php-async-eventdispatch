@@ -15,6 +15,11 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 			$port=$options;
 		}
 
+		if($options instanceof \Memcached){
+			$this->memcached=$options;
+			return;
+		}
+
 		$memcached = new \Memcached();
 		if($memcached->addServer('127.0.0.1', intval($port))===false){
 			throw new \Exception('Failed to connect to memcached server: ' .$memcached->getResultMessage().' - '.$memcached->getResultCode());
