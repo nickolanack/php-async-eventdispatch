@@ -114,7 +114,7 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 		$list = $this->memcached->getAllKeys();
 
 		if($list===false){
-			throw new \Exception('Failed to getAllKeys: '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode());
+			throw new \Exception('Failed to getAllKeys: '. $this->memcached->getResultMessage().' - '.$this->memcached->getResultCode().' '.print_r($this->memcached->getServerList(), true));
 		}
 
 		return $list;
