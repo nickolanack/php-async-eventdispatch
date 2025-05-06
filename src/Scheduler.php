@@ -77,7 +77,7 @@ abstract class Scheduler {
 
 	private function _throttleOk($scheduleName, $scheduleData){
 
-		return $this->lockThrottle($scheduleData->schedule->name, function()use($scheduleName, $scheduleData){
+		$result = $this->lockThrottle($scheduleData->schedule->name, function()use($scheduleName, $scheduleData){
 
 			if ($this->shouldThrottle($scheduleName, $scheduleData)) {
 				$this->throttle($scheduleName);
@@ -93,6 +93,11 @@ abstract class Scheduler {
 
 		});
 
+		if(!is_bool($result)){
+			throw new \Exception('Expected passthrough boolean result from call to lockThrottle');
+		}
+
+		return $result;
 	
 	}
 
@@ -269,7 +274,7 @@ abstract class Scheduler {
 			//return;
 		}
 
-		//echo getmypid() . ': Discard Throttled Schedule: ' .$scheduleName. "\n";
+		// echo getmypid() . ': Discard Throttled Schedule('.$schedule->schedule->name.'): ' .$scheduleName. "\n";
 		$this->removeSchedule($scheduleName);
 
 	}
@@ -320,36 +325,38 @@ abstract class Scheduler {
 		foreach ($this->queuedItems as $scheduleName) {
 			if (!key_exists($scheduleName, $this->queuedItemsData)) {
 				$data = $this->getScheduleData($scheduleName);
-				if (!is_null($data)) {
-
-					
-
-
-						if (isset($data->schedule->interval) && $this->intervalIsAlreadyRunning($data->schedule->name, $data->schedule->token)) {
-							
-							$this->lockEvent($scheduleName, function()use($scheduleName){
-								//echo getmypid() . ': Discard Interval'."\n";
-								$this->removeSchedule($scheduleName);
-							});
-							continue;
-						}
-
-						if (isset($data->schedule->throttle) && $this->shouldThrottle($scheduleName, $data)) {
-							
-							$this->lockEvent($scheduleName, function()use($scheduleName){
-								$this->throttle($scheduleName);	
-							});
-							
-							continue;
-						}
-
-						$this->queuedItemsData[$scheduleName] = $data;
-					
-
-				} else {
+				if (is_null($data)) {
 					//already deleted by another thread
 					//echo getmypid() . ': Sorting: Null data: ' . $scheduleName . "\n";
+					continue;
 				}
+					
+
+				// remove schedules that are interval queued and already running
+				if (isset($data->schedule->interval) && $this->intervalIsAlreadyRunning($data->schedule->name, $data->schedule->token)) {
+					
+					$this->lockEvent($scheduleName, function()use($scheduleName){
+						//echo getmypid() . ': Discard Interval'."\n";
+						$this->removeSchedule($scheduleName);
+					});
+					continue;
+				}
+
+				// remove schedules that should be throttled
+				if (isset($data->schedule->throttle) && $this->shouldThrottle($scheduleName, $data)) {
+					
+					$this->lockEvent($scheduleName, function()use($scheduleName){
+						$this->throttle($scheduleName);	
+					});
+					
+					continue;
+				}
+
+				// runable schedules
+				$this->queuedItemsData[$scheduleName] = $data;
+					
+
+				
 			}
 		}
 

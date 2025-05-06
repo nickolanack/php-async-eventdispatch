@@ -69,3 +69,13 @@ if($dispatcher->shouldHandleEvent()){
 // $dispatcher->schedule($event, $eventArgs, $seconds);
 
 ```
+
+### Memcached Quick Start
+
+memcached up and running quickly in a docker container
+
+```
+
+docker run -d --name memcached -p 11211:11211 memcached
+
+```

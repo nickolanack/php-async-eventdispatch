@@ -15,8 +15,8 @@ $dispatcher = new asyncevent\AsyncEventDispatcher(array(
 		);
 	},
 	'log' => __DIR__ . '/.schedule.log',
-	'handler' => asyncevent\FileScheduler::class,
-	'schedule' => __DIR__ . '/schedules',
+	'schedule' => 'localhost:11211/awesome',
+	'handler' => \asyncevent\schedulers\MemcachedScheduler::class,
 ));
 
 if ($dispatcher->shouldHandleEvent()) {

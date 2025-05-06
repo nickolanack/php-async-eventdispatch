@@ -110,8 +110,10 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 
 	protected function _exists($name){
 		$name=$this->_name($name);
-		//echo 'exists: '.$name."\n";
-		return $this->memcached->get($this->namespace.$name)!==false;
+		
+		$result = $this->memcached->get($this->namespace.$name)!==false;
+		// echo ($result?'exists: ':'not-exists: ').$name."\n";
+		return $result;
 	}
 
 	protected function _touch($name){
@@ -194,6 +196,7 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 	}
 	protected function markThrottledExecution($eventName){
 		$throttle = '.throttle.' .$eventName.'.last';
+		// echo "Mark throttled: ".$eventName."\n";
 		$this->_touch($throttle);
 	}
 	protected function getLastIntervalExecution($eventName){
@@ -346,15 +349,21 @@ class MemcachedScheduler extends \asyncevent\Scheduler {
 			return;
 		}
 		if(!$this->_add($file.'.lock', getmypid())){
+
+			if($this->_exists($file.'.lock')){
+				// error_log('Already locked: '.$file.'.lock');
+				// throw new \Exception('Failed to create lock: '.$file.'.lock');
+			}
+
 			return;
 		}
 
 		
-		$callback();
-	
-
+		$result=$callback();
 	
 		$this->_delete($file.'.lock');
+
+		return $result;
         
 	  
 	}
